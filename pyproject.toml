@@ -132,7 +132,7 @@ color = true
 omit-covered-files = false
 generate-badge = "docs/badges"
 badge-format = "svg"
-badge-style = "for-the-badge"
+badge-style = "flat"
 
 [tool.mypy]
 # Specify the target platform details in config, so your developers are
