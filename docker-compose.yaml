@@ -1,0 +1,17 @@
+services:
+  local-ci:
+    container_name: gitlab-runner
+    image: gitlab/gitlab-runner:alpine
+    restart: no
+    working_dir: "/tmp"
+    volumes:
+      - ./:/tmp
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mac volume mount
+      - /Users/Shared/gitlab-runner/config:/etc/gitlab-runner
+      # Ubuntu volume mount
+      # - /srv/gitlab-runner/config:/etc/gitlab-runner
+    privileged: true
+    entrypoint: "gitlab-runner"
+    command: "exec docker .tox-ci-localhost --docker-privileged"
+#    command: "/bin/ash"

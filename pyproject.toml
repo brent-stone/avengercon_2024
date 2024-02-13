@@ -1,0 +1,179 @@
+[tool.poetry]
+name = "avengercon"
+version = "0.1.0"
+description = "Avengercon VIII Workshop: Parallel Data Engineering in Python"
+authors = ["Brent Stone <brent.j.stone2.mil@army.mil>"]
+license = "MIT"
+readme = "README.md"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+repository = "https://github.com/brent-stone/avengercon_2024"
+documentation = "https://github.com/brent-stone/avengercon_2024"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+black = "^24.2.0"
+pytest-cov = "^4.1.0"
+pre-commit = "^3.6.1"
+mypy = "^1.8.0"
+interrogate = "^1.5.0"
+pytest-sugar = "^1.0.0"
+mkdocs-material = "^9.5.9"
+mkdocstrings = {extras = ["python"], version = "^0.24.0"}
+tox = {extras = ["toml"], version = "^4.12.1"}
+coverage = "^7.4.1"
+
+
+[tool.poetry.group.pytest.dependencies]
+pytest = "^8.0.0"
+pytest-cov = "^4.1.0"
+pytest-asyncio = "^0.23.2"
+pytest-local-badge = "^1.0.3"
+pytest-sugar = "^1.0.0"
+
+
+[tool.poetry.group.mypy.dependencies]
+mypy = "^1.8.0"
+types-all = "^1.0.0"
+pandas-stubs = "^2.1.4.231227"
+
+
+[tool.poetry.group.mkdocs.dependencies]
+mkdocs-material = "^9.5.9"
+mkdocstrings = {extras = ["python"], version = "^0.24.0"}
+
+
+[tool.poetry.group.coverage.dependencies]
+coverage = {extras = ["toml"], version = "^7.4.1"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+# https://docs.pytest.org/en/latest/reference/customize.html
+minversion = "7.0"
+# -ra flag is what type of test output to show extra summary info. (a)ll, (f)ailed, etc.
+# Be sure to keep this in sync with the flags in tox.ini
+addopts = [
+    "-ra",
+    "--quiet",
+    "--color=yes",
+]
+testpaths = [
+    "tests",
+]
+asyncio_mode = "auto"
+log_cli=true
+log_auto_indent=true
+log_level="INFO"
+
+# Coverage configuration reference
+# https://coverage.readthedocs.io/en/7.2.7/config.html
+[tool.coverage.run]
+branch = true
+source = ["avengercon"]
+parallel = true
+relative_files = true
+# data_file = "docs/coverage.sqlite3"
+omit = [
+    ".pytest_cache/*",
+    ".tox/*",
+    ".venv/*",
+    ".cache/*",
+    "*/docs*",
+    "*/site*",
+    "*/scripts*",
+]
+
+[tool.coverage.report]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+title = "Coverage Report"
+directory = "docs/coverage"
+skip_empty = true
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+
+# https://github.com/econchick/interrogate/tree/master#configuration
+[tool.interrogate]
+ignore-init-method = true
+ignore-init-module = false
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-property-decorators = false
+ignore-module = false
+ignore-nested-functions = false
+ignore-nested-classes = true
+ignore-setters = false
+fail-under = 95
+exclude = ["docs", "site", "build", ".tox", ".idea", ".venv", ".pytest_cache", "blah.py", "blah2.py"]
+ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*"]
+# possible values: 0 (minimal output), 1 (-v), 2 (-vv)
+verbose = 2
+quiet = false
+whitelist-regex = []
+color = true
+omit-covered-files = false
+generate-badge = "docs/badges"
+badge-format = "svg"
+badge-style = "for-the-badge"
+
+[tool.mypy]
+# Specify the target platform details in config, so your developers are
+# free to run mypy on Windows, Linux, or macOS and get consistent
+# results.
+python_version="3.11"
+plugins="pydantic.mypy, numpy.typing.mypy_plugin"
+pretty = true
+mypy_path = "stubs"
+show_column_numbers = true
+# show error messages from unrelated files
+follow_imports = "normal"
+# be strict
+disallow_untyped_calls=true
+strict_optional=true
+strict_equality=true
+warn_no_return=true
+warn_redundant_casts=true
+warn_unused_ignores=true
+warn_unused_configs=true
+# Minio is working on type hinted compliance but no there yet as of DEC23
+#disallow_any_unimported=true
+#warn_return_any=true
+#disallow_any_generics=true
+disallow_any_unimported=false
+warn_return_any=false
+disallow_any_generics=false
+# Unreachable blocks have been an issue when compiling mypyc, let's try
+# to avoid 'em in the first place.
+warn_unreachable=true
+# The following are off by default.  Flip them on if you feel adventurous.
+disallow_untyped_defs=true
+check_untyped_defs=true
+show_error_codes=true
+show_error_context=true
+# No incremental mode
+cache_dir="/dev/null"
+# suppress errors about unsatisfied imports for untyped packages
+[[tool.mypy.overrides]]
+module = [
+    "minio.*",
+    "avengercon.minio.*",
+]
+ignore_missing_imports = true
