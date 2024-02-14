@@ -23,7 +23,7 @@ Tooling </br>
 [![Redis Stack](docs/badges/redis.svg)](https://redis.io/docs/about/about-stack/)
 
 See [the documentation](https://brent-stone.github.io/avengercon_2024/) for information
-on using this repo. The [Avenercon VIII conference](https://avengercon.com/) 
+on using this repo. The [Avengercon VIII conference](https://avengercon.com/) 
 homepage has details about the event.
 
 ---

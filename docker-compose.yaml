@@ -1,17 +1,185 @@
 services:
-  local-ci:
-    container_name: gitlab-runner
-    image: gitlab/gitlab-runner:alpine
-    restart: no
-    working_dir: "/tmp"
+  traefik:
+    container_name: avengercon-proxy
+    image: traefik:3.0
+    restart: always
+    networks:
+      - avengercon
     volumes:
-      - ./:/tmp
-      - /var/run/docker.sock:/var/run/docker.sock
-      # Mac volume mount
-      - /Users/Shared/gitlab-runner/config:/etc/gitlab-runner
-      # Ubuntu volume mount
-      # - /srv/gitlab-runner/config:/etc/gitlab-runner
-    privileged: true
-    entrypoint: "gitlab-runner"
-    command: "exec docker .tox-ci-localhost --docker-privileged"
-#    command: "/bin/ash"
+      # Enable communication between Traefik and the docker daemon
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/data:/config
+    ports:
+      # DEV ONLY port exposures
+      # Expose localhost webapps (e.g. MinIO)
+      - target: 80
+        published: ${HTTP_PORT:?missing .env file with HTTP_PORT}
+        mode: host
+      # Expose Redis API [DEV ONLY]
+      - target: 6379
+        published: ${TEST_REDIS_PORT:?missing .env file with TEST_REDIS_PORT}
+        mode: host
+      # Expose MinIO API [DEV ONLY]
+      - target: 9000
+        published: ${TEST_MINIO_PORT:?missing .env file with TEST_MINIO_PORT}
+        mode: host
+    command:
+      # Traefik Static Configuration Command Line Arguments
+      # NOTE: Order of operations matters
+      # Enable the API and Dashboard. This must come first so the API is enabled before
+      # the entrypoints/routers are established. Otherwise, it won't work reliably.
+      - --api=true
+      - --api.dashboard=true
+      - --api.insecure=false
+      # Enable the access log (HTTP requests) and Traefik log (configs and errors)
+      - --log=true
+      - --log.level=INFO
+      - --accesslog
+      # Enable Docker in Traefik, so that it reads labels from Docker services
+      - --providers.docker=true
+      # Do not expose all Docker services, only the ones explicitly exposed
+      - --providers.docker.exposedbydefault=false
+
+      # Define entrypoint for dev-only HTTP
+      - --entrypoints.avengercon-entrypoint-web.address=:80
+      - --entrypoints.avengercon-entrypoint-web.forwardedHeaders.insecure
+      - --entrypoints.avengercon-entrypoint-web.http.middlewares=avengercon-http-whitelist@docker
+
+      # Define entrypoint for Traefik dashboard
+#      - --entrypoints.dashboard.address=:8080
+#      - --entrypoints.dashboard.http.redirections.entryPoint.to=web
+#      - --entrypoints.dashboard.http.redirections.entryPoint.scheme=http
+
+      # Define entrypoint for direct Redis TCP connections
+      - --entrypoints.avengercon-entrypoint-redis.address=:6379/tcp
+
+      # Define entrypoint for direct MinIO TCP connections
+      - --entrypoints.avengercon-entrypoint-minio.address=:9000/tcp
+    labels:
+      # Enable Traefik for this service, to make it available in the public network
+      - traefik.enable=true
+      - traefik.docker.network=avengercon
+
+      # Enable dashboard routing
+      # Access the dashboard at https://proxy.localhost/dashboard/
+#      - traefik.http.services.traefik-service.loadBalancer.server.port=8080
+#      - traefik.http.services.traefik-service.loadBalancer.server.scheme=http
+      - traefik.http.routers.avengercon-router-traefik.entrypoints=avengercon-entrypoint-web
+      - traefik.http.routers.avengercon-router-traefik.rule=Host(`${SUBDOMAIN_PROXY}.${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`)) && ${TRAEFIK_PRIVATE_IP_CLIENT_RULE}
+      - traefik.http.routers.avengercon-router-traefik.service=api@internal
+      - traefik.http.routers.avengercon-router-traefik.tls=false
+
+      # Add a basic IP whitelist middleware to provide a minimal amount of protection to localhost HTTP
+      - "traefik.http.middlewares.avengercon-http-whitelist.ipallowlist.sourcerange=10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
+
+  redis:
+    container_name: avengercon-redis
+    image: redis/redis-stack:7.2.0-v8
+    networks:
+      - avengercon
+    ports:
+      - target: 6379  # Redis API
+        mode: host
+      - target: 8001  # Redis Insight UI
+        mode: host
+    environment:
+      REDIS_ARGS: "--requirepass ${REDIS_PASSWORD:?missing .env file with REDIS_PASSWORD}"
+    volumes:
+      - type: volume
+        source: redis-volume
+        target: /db
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=avengercon
+
+      # Redis Insight webapp routing via traefik
+      - traefik.http.services.avengercon-service-redis.loadBalancer.server.port=8001
+      - traefik.http.services.avengercon-service-redis.loadBalancer.server.scheme=http
+      - traefik.http.routers.avengercon-router-redis.entrypoints=avengercon-entrypoint-web
+      - traefik.http.routers.avengercon-router-redis.rule=Host(`${SUBDOMAIN_CACHE}.${DOMAIN}`) && ${TRAEFIK_PRIVATE_IP_CLIENT_RULE}
+      - traefik.http.routers.avengercon-router-redis.service=avengercon-service-redis
+      - traefik.http.routers.avengercon-router-redis.tls=false
+
+      # Enable localhost direct TCP connection
+      - traefik.tcp.services.avengercon-service-redis-tcp.loadBalancer.server.port=6379
+      - traefik.tcp.routers.avengercon-router-redis-tcp.service=avengercon-service-redis-tcp
+      - traefik.tcp.routers.avengercon-router-redis-tcp.entryPoints=avengercon-entrypoint-redis
+      - traefik.tcp.routers.avengercon-router-redis-tcp.rule=HostSNI(`*`) && ${TRAEFIK_PRIVATE_IP_CLIENT_RULE}
+      - traefik.tcp.routers.avengercon-router-redis-tcp.tls=false
+
+  minio:
+    container_name: avengercon-minio
+    image: minio/minio:RELEASE.2024-02-13T15-35-11Z
+    command: server --address ":9000" --console-address ":9090" /data
+    volumes:
+      - minio-volume:/data
+    networks:
+      - avengercon
+    ports:
+      - target: 9000  # MinIO API
+        mode: host
+      - target: 9090  # MinIO webapp
+        mode: host
+    environment:
+      # https://min.io/docs/minio/linux/reference/minio-server/settings.html
+      MINIO_ROOT_USER: "${MINIO_ROOT_USER:?missing .env file with MINIO_ROOT_USER}"
+      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:?missing .env file with MINIO_ROOT_PASSWORD}"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=avengercon
+
+      # MinIO console webapp via traefik
+      - traefik.http.services.avengercon-service-minio.loadBalancer.server.port=9090
+      - traefik.http.services.avengercon-service-minio.loadBalancer.server.scheme=http
+      - traefik.http.routers.avengercon-router-minio.entrypoints=avengercon-entrypoint-web
+      - traefik.http.routers.avengercon-router-minio.rule=Host(`${SUBDOMAIN_MINIO}.localhost`)
+      - traefik.http.routers.avengercon-router-minio.service=avengercon-service-minio
+      - traefik.http.routers.avengercon-router-minio.tls=false
+
+      # Enable localhost direct TCP connection
+      - traefik.tcp.services.avengercon-service-minio-tcp.loadBalancer.server.port=9000
+      - traefik.tcp.routers.avengercon-router-minio-tcp.service=avengercon-service-minio-tcp
+      - traefik.tcp.routers.avengercon-router-minio-tcp.entryPoints=avengercon-entrypoint-minio
+      - traefik.tcp.routers.avengercon-router-minio-tcp.rule=HostSNI(`*`) && ${TRAEFIK_PRIVATE_IP_CLIENT_RULE}
+      - traefik.tcp.routers.avengercon-router-minio-tcp.tls=false
+
+  whoami:
+    container_name: avengercon-whoami
+    image: traefik/whoami
+    restart: always
+    ports:
+      - target: 80
+        mode: host
+    networks:
+      - avengercon
+    command:
+      - --name=avengercon_whoami
+      - --port=80
+      - --verbose
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=avengercon
+      - traefik.http.services.avengercon-service-whoami.loadBalancer.server.port=80
+      - traefik.http.services.avengercon-service-whoami.loadBalancer.server.scheme=http
+      - traefik.http.routers.avengercon-router-whoami.entrypoints=avengercon-entrypoint-web
+      - traefik.http.routers.avengercon-router-whoami.rule=Host(`${SUBDOMAIN_WHOAMI}.${DOMAIN}`) && ${TRAEFIK_PRIVATE_IP_CLIENT_RULE}
+      - traefik.http.routers.avengercon-router-whoami.service=avengercon-service-whoami
+      - traefik.http.routers.avengercon-router-whoami.tls=false
+
+volumes:
+  redis-volume:
+  minio-volume:
+
+networks:
+  avengercon:
+    internal: false
+    name: avengercon
