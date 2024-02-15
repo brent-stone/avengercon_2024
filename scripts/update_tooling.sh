@@ -50,6 +50,9 @@ if ! which python | grep -q ".venv"; then
   exit
 fi
 
+poetry config warnings.export false
+poetry config virtualenvs.in-project true
+
 if ! poetry self show plugins | grep -q "poetry-plugin-up"; then
   echo "poetry-plugin-up not installed. Adding it now";
   poetry self add poetry-plugin-up

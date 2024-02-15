@@ -1,6 +1,9 @@
 site_name: Avengercon VIII Workshop
-site_description: Avengercon VIII Workshop--Parallel Data Engineering in Python
+site_description: Avengercon VIII Workshop--Horizontally Scaling Python for Production
 strict: true
+repo_name: brent-stone/avengercon_2024
+repo_url: https://github.com/brent-stone/avengercon_2024
+edit_uri: edit/main/docs/
 
 watch:
   - avengercon
@@ -28,6 +31,8 @@ theme:
     - content.code.copy
     - announce.dismiss
     - navigation.tabs
+    - content.action.view
+    - content.action.edit
   logo: 'cyber_branch.png'
   favicon: 'favicon.png'
 
@@ -39,7 +44,8 @@ validation:
 
 nav:
   - Home: index.md
-  - Developers:
+  - 1. Hello, Workshop!: workshop/1_hello_workshop.md
+  - Other Information:
       - Cloudflare: developers/cloudflare.md
       - Docker: developers/docker.md
       - Documentation: developers/docs.md
@@ -89,3 +95,7 @@ plugins:
             docstring_options:
               ignore_init_summary: true
             merge_init_into_class: true
+  - git-revision-date-localized:
+      enabled: !ENV [CI, false]
+      type: date
+      enable_creation_date: true

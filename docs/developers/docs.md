@@ -27,6 +27,12 @@ Examples:
 !!! warning
     This is a warning.
 
+### Buttons and Icons
+The [icon search](https://squidfunk.github.io/mkdocs-material/reference/icons-emojis/#search)
+page has a quick lookup of available icons that mkdocs-material supports.
+
+[Send :fontawesome-solid-paper-plane:](#){ .md-button }
+
 ### Example Sites Using Mkdocs-Material
 
 * [up42](https://github.com/up42/up42-py/tree/master) is a nice example of customizing

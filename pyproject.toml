@@ -1,14 +1,13 @@
 [tool.poetry]
 name = "avengercon"
 version = "0.1.0"
-description = "Avengercon VIII Workshop: Parallel Data Engineering in Python"
+description = "Avengercon VIII Workshop: Horizontally Scaling Python for Production"
 authors = ["Brent Stone <brent.j.stone2.mil@army.mil>"]
 license = "MIT"
 readme = "README.md"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: Implementation :: CPython",
 ]
@@ -36,7 +35,7 @@ coverage = "^7.4.1"
 [tool.poetry.group.pytest.dependencies]
 pytest = "^8.0.0"
 pytest-cov = "^4.1.0"
-pytest-asyncio = "^0.23.2"
+pytest-asyncio = "^0.23.5"
 pytest-local-badge = "^1.0.3"
 pytest-sugar = "^1.0.0"
 
@@ -50,10 +49,8 @@ pandas-stubs = "^2.1.4.231227"
 [tool.poetry.group.mkdocs.dependencies]
 mkdocs-material = "^9.5.9"
 mkdocstrings = {extras = ["python"], version = "^0.24.0"}
+mkdocs-git-revision-date-localized-plugin = "^1.2.4"
 
-
-[tool.poetry.group.coverage.dependencies]
-coverage = {extras = ["toml"], version = "^7.4.1"}
 
 [build-system]
 requires = ["poetry-core"]
