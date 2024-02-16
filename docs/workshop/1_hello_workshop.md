@@ -5,15 +5,16 @@ get our developer environment setup?
 
 ## **Get Ready**: System-level installation
 
-![Take This](1_images/0_take_this.png)
+![Take This](1_images/take_this.png)
 
 You'll need the following software installed to begin:
 
 1. [Docker](https://docs.docker.com/engine/install/)
 2. [Python 3.11](https://www.python.org/downloads/)
+3. [Git](https://git-scm.com/downloads)
 
 !!! note "Optional software"
-    === "Python managers"
+    === "Python interpreter manager"
         To keep Python from messing up your OS configs, It is recommended to install &
         manage Python interpreters using a manager like
         [pyenv](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation) or
@@ -27,7 +28,12 @@ You'll need the following software installed to begin:
         <br/>**Why Poetry?**<br/>
         While hatch and other tools are promising, as of this workshop Poetry remains one
         of the best developer experiences (DX) for setup of python virtual environments and
-        [PEP 518 and 621 pyproject.toml based Python packages](https://packaging.python.org/en/latest/specifications/pyproject-toml/#pyproject-toml-spec).
+        [modern pyproject.toml based Python packages](https://packaging.python.org/en/latest/specifications/pyproject-toml/#pyproject-toml-spec).
+    === "Git GUI Client"
+        [Git GUI Clients](https://git-scm.com/downloads/guis) simply save time. While it
+        may feel nice to flex that you have every possible permutation of Git commands
+        memorized, 2-second point-and-click to stage dozens of files and side-by-side
+        highlighted diffs are the way to go.
 
 ## **Get Set**: Prepare your virtual environment
 
@@ -127,7 +133,12 @@ avengercon-whoami  | 2024/02/15 16:38:02 172.27.0.3:45642 - - [15/Feb/2024:16:38
 ```
 
 ### Verify you can access your deployed services
-Ensure you can open a web browser to the following local services:
+Ensure you can open a web browser to the following local services. For each button,
+**you probably want to right-click and open in new tab**.
+
+If anything fails to open, double-check the port in the opened link matches the port
+specified by `HTTP_PORT` in your `.env` configuration. (default is `57073`; l33t speak
+approximation for "Stone")
 
 === "Whoami"
     [Whoami :octicons-home-24:](http://whoami.localhost:57073/){ .md-button .md-button--primary}

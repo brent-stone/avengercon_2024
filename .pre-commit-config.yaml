@@ -63,5 +63,5 @@ repos:
             exclude: '^.idea|^.venv|^.tox|^scripts|^tests'
             args:
             -   -s
-            -   B101
+            -   B101,B104
 exclude: '(site|.tox|.venv|.pytest_cache)/.*'

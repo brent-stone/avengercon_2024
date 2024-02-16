@@ -1,3 +1,8 @@
+x-avengercon-build: &avengercon-build
+  context: ./
+  dockerfile: DockerfileAvengercon
+  target: development
+
 services:
   traefik:
     container_name: avengercon-proxy
@@ -174,6 +179,44 @@ services:
       - traefik.http.routers.avengercon-router-whoami.rule=Host(`${SUBDOMAIN_WHOAMI}.${DOMAIN}`) && ${TRAEFIK_PRIVATE_IP_CLIENT_RULE}
       - traefik.http.routers.avengercon-router-whoami.service=avengercon-service-whoami
       - traefik.http.routers.avengercon-router-whoami.tls=false
+
+  celery:
+    container_name: avengercon-celery
+    image: avengercon-celery
+    build: *avengercon-build
+    networks:
+      - avengercon
+    command:
+      celery
+      --app=avengercon.celery.celery_server
+      worker
+      --loglevel=${LOG_LEVEL:?missing .env file with LOG_LEVEL}
+      --uid=nobody
+      --gid=nogroup
+      # enable hot reload of celery workers and registered tasks via watchdog
+#      watchmedo auto-restart
+#      --directory=/app/avengercon/celery
+#      --pattern=*.py
+#      --recursive
+#      -- celery
+#      --app=avengercon.celery.celery_server worker
+#      --loglevel=${LOG_LEVEL:?missing .env file with LOG_LEVEL}
+#      --uid=nobody --gid=nogroup
+    volumes:
+      # Mount local host's code into the container for 'live' development
+      # but only hot reload when changes to the Celery submodule is made
+      - ./avengercon/celery:/app/avengercon/celery
+    env_file:
+      - .env
+    restart: always
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "celery inspect ping | grep 'pong'" ]
+      interval: 5s
+      timeout: 30s
+      retries: 10
 
 volumes:
   redis-volume:

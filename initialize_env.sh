@@ -65,8 +65,8 @@ TEST_REDIS_PORT="57076"
 # Celery & Flower Dashboard Settings
 # These two values are needed to ensure Celery's upstream Kombu dependency understands
 # which broker and backend port to use.
-CELERY_BROKER_URL="redis://:${REDIS_PASSWORD_URL_ENCODED}@${REDIS_HOST}:${TEST_REDIS_PORT}/0"
-CELERY_RESULT_BACKEND="${CELERY_BROKER_URL}"
+#CELERY_BROKER_URL="redis://:${REDIS_PASSWORD_URL_ENCODED}@${REDIS_HOST}:${TEST_REDIS_PORT}/0"
+#CELERY_RESULT_BACKEND="${CELERY_BROKER_URL}"
 FLOWER_PORT="57077"
 
 # Minio Settings
@@ -114,9 +114,9 @@ else
     echo "DEPENDENCY_LOGIN_WAIT_SEC=${DEPENDENCY_LOGIN_WAIT_SEC}";
     echo "DEPENDENCY_LOGIN_RETRY_COUNT=${DEPENDENCY_LOGIN_RETRY_COUNT}";
 
-    echo "# Celery settings";
-    echo "CELERY_BROKER_URL=${CELERY_BROKER_URL}";
-    echo "CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}";
+#    echo "# Celery settings";
+#    echo "CELERY_BROKER_URL=${CELERY_BROKER_URL}";
+#    echo "CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}";
 
     echo "# Redis Settings";
     echo "REDIS_HOST=${REDIS_HOST}";

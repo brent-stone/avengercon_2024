@@ -9,6 +9,7 @@ from pytest import fail
 def test_import() -> None:
     """
     Validate that the AutoAI package is importable by pytest and using semantic
+    versioning
 
     Returns: None
 

@@ -1,0 +1,61 @@
+FROM python:3.11-slim as requirements
+
+WORKDIR /tmp
+RUN mkdir -p requirements
+RUN pip install --upgrade pip poetry
+RUN poetry self add poetry-plugin-export
+COPY ./pyproject.toml pyproject.toml
+COPY ./poetry.lock poetry.lock
+COPY ./scripts/export_poetry_to_req_txt.sh export_poetry_to_req_txt.sh
+RUN chmod +x export_poetry_to_req_txt.sh
+RUN ./export_poetry_to_req_txt.sh
+
+FROM python:3.11-slim as base
+
+# Ensure curl is available for healthcheck via curl
+# The additional packages are to support compiling google-re python wheel with the C++
+# library
+# https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#run
+# "Always combine RUN apt-get update with apt-get install in the same RUN statement."
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+    curl # \
+#    gcc \
+#    g++ \
+#    libre2-dev \
+#    libpq-dev
+    # Add additional installations here with trailing `\` on each line \
+
+# Cleanup the apt cache to reduce image size
+RUN apt-get purge -y --auto-remove
+RUN rm -rf /var/lib/apt/lists/*
+
+RUN pip install --upgrade pip
+
+ENV PYTHONPATH=./
+
+EXPOSE 8883
+
+FROM base as development
+LABEL maintainer="Brent Stone <brent.j.stone2.mil@army.mil>"
+
+WORKDIR /app
+COPY --from=requirements /tmp/requirements/requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+COPY ./entrypoints/start-reload.sh start-reload.sh
+RUN chmod +x start-reload.sh
+
+COPY ./entrypoints/prestart.sh prestart.sh
+RUN chmod +x prestart.sh
+
+COPY ./README.md README.md
+COPY ./pyproject.toml pyproject.toml
+COPY ./avengercon avengercon
+
+RUN pip install /app
+
+FROM development as production
+
+# Remove pip's cache to reduce final image size
+# https://pip.pypa.io/en/stable/topics/caching/#avoiding-caching
+RUN pip cache purge
