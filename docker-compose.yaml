@@ -15,11 +15,16 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/data:/config
     ports:
-      # DEV ONLY port exposures
-      # Expose localhost webapps (e.g. MinIO)
+      # Note: It's recommended to use a service like Let's Encrypt or Cloudflare Tunnels
+      # to serve all web traffic through HTTPS. Then, split up this docker-compose.yaml
+      # into a 2nd docker-compose.override.yaml for development which holds the direct
+      # port exposures of sensitive services like Redis and MinIO APIs. Then remove them
+      # from this file so 'prod' deployments don't directly expose the APIs.
+      # Expose webapps
       - target: 80
         published: ${HTTP_PORT:?missing .env file with HTTP_PORT}
         mode: host
+      # DEV ONLY port exposures
       # Expose Redis API [DEV ONLY]
       - target: 6379
         published: ${TEST_REDIS_PORT:?missing .env file with TEST_REDIS_PORT}
@@ -187,21 +192,12 @@ services:
     networks:
       - avengercon
     command:
-      celery
-      --app=avengercon.celery.celery_server
-      worker
-      --loglevel=${LOG_LEVEL:?missing .env file with LOG_LEVEL}
-      --uid=nobody
-      --gid=nogroup
-      # enable hot reload of celery workers and registered tasks via watchdog
-#      watchmedo auto-restart
-#      --directory=/app/avengercon/celery
-#      --pattern=*.py
-#      --recursive
-#      -- celery
-#      --app=avengercon.celery.celery_server worker
-#      --loglevel=${LOG_LEVEL:?missing .env file with LOG_LEVEL}
+#      celery --app=avengercon.celery.celery_server worker --loglevel="${LOG_LEVEL}"
 #      --uid=nobody --gid=nogroup
+      # enable hot reload of celery workers and registered tasks via watchdog
+      watchmedo auto-restart --directory=/app/avengercon/celery --pattern=*.py --recursive
+      -- celery --app=avengercon.celery.celery_server worker --loglevel="${LOG_LEVEL}"
+      --uid=nobody --gid=nogroup
     volumes:
       # Mount local host's code into the container for 'live' development
       # but only hot reload when changes to the Celery submodule is made
@@ -218,6 +214,64 @@ services:
       timeout: 30s
       retries: 10
 
+  flower:
+    container_name: avengercon-flower
+    image: avengercon-flower
+    command:
+      celery --app=avengercon.celery.celery_server flower --loglevel="${LOG_LEVEL}"
+    restart: always
+    ports:
+      - target: 5555
+        mode: host
+    networks:
+      - avengercon
+    build: *avengercon-build
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      celery:
+        condition: service_healthy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=avengercon
+      - traefik.http.services.avengercon-service-flower.loadBalancer.server.port=5555
+      - traefik.http.services.avengercon-service-flower.loadBalancer.server.scheme=http
+      - traefik.http.routers.avengercon-router-flower.entrypoints=avengercon-entrypoint-web
+      - traefik.http.routers.avengercon-router-flower.rule=Host(`${SUBDOMAIN_FLOWER}.${DOMAIN}`) && ${TRAEFIK_PRIVATE_IP_CLIENT_RULE}
+      - traefik.http.routers.avengercon-router-flower.service=avengercon-service-flower
+      - traefik.http.routers.avengercon-router-flower.tls=false
+    healthcheck:
+      test: [ "CMD-SHELL",
+              "curl --fail --silent http://localhost:5555 || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+# Note: For those that would like to enable TLS (HTTPS) services, re-enable this service
+# and copy paste your tunnel token into the .cloudflare.env file. Also be sure to declare
+# a 443 entrypoint with Traefik and swap out the commented settings with the HTTP config
+# used for the workshop. You'll also need to ensure your Cloudflare Access settings
+# accurately match the DOMAIN and SUBDOMAIN_* targets declared in the .env
+#  cf-tunnel:
+#    # NOTE: Run the /scripts/expand_quic_buffers.sh script to ensure this
+#    # container has the recommended buffer sizes available.
+#    container_name: avengercon-cloudflare
+#    image: cloudflare/cloudflared:latest
+#    restart: unless-stopped
+#    command: tunnel --no-autoupdate run
+#    env_file:
+#      - .cloudflare.env
+#    volumes:
+#      # Enable communication between cloudflared container and the docker daemon for
+#      # internal docker bridge network DNS resolution
+#      - /var/run/docker.sock:/var/run/docker.sock:ro
+#    networks:
+#      - cf-tunnel
+
+
 volumes:
   redis-volume:
   minio-volume:
@@ -226,3 +280,14 @@ networks:
   avengercon:
     internal: false
     name: avengercon
+
+#networks:
+#  cf-tunnel:
+#    internal: false
+#    name: cf-tunnel
+#  avengercon-public:
+#    internal: false
+#    name: avengercon-public
+#  avengercon-private:
+#    internal: true
+#    name: avengercon-private

@@ -159,3 +159,7 @@ cython_debug/
 *.key
 blah.py
 blah2.py
+
+html/
+
+index.html

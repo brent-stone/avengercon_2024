@@ -11,6 +11,8 @@ ENDCOLOR="\e[0m"
 # Environment variable paths used throughout the project
 declare -a PathArray=(
   ".env" \
+  ".localhost.env" \
+  ".cloudflare.env" \
 )
 # Iterate over the paths and remove the files if present
 # The [@] operator is get all elements, space-separated

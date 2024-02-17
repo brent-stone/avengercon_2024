@@ -37,11 +37,11 @@ def verify_celery_connection(a_celery_server: Celery) -> bool:
                 a_celery_server.control.inspect().ping()
             )
             if isinstance(response, dict) and bool(response):
-                logger.info("Celery successfully connected to Redis.")
+                logger.info("Celery successfully connected.")
                 return True
         except (ConnectionError, OperationalError):
             pass
-        logger.warning("Celery worker failed to connect")
+        logger.warning("Celery failed to connect")
         logger.warning(
             f"\t{avengercon_config.DEPENDENCY_LOGIN_RETRY_COUNT - i} retries pending...",
         )

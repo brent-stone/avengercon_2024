@@ -46,6 +46,10 @@ class RedisConfig(BaseSettings):
 
 
 try:
+    # Note: As of 17FEB24 there's a conflict between Pydantic's dataclass behavior and
+    # mypy/pyright. Ignore for now:
+    # https://github.com/pydantic/pydantic-settings/issues/201#issuecomment-1950266275
+    # TODO: Remove the type ignore once a fix is in place
     redis_config = RedisConfig()  # type: ignore
     logger.debug("Successfully found Redis configuration")
 except ValidationError as e:

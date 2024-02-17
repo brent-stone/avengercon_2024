@@ -18,17 +18,18 @@ documentation = "https://github.com/brent-stone/avengercon_2024"
 python = "^3.10"
 minio = "^7.2.4"
 pydantic = "^2.6.1"
-pydantic-settings = "^2.1.0"
+pydantic-settings = "^2.2.0"
 fastapi = "^0.109.2"
 uvicorn = {extras = ["standard"], version = "^0.27.1"}
 pandas = "^2.2.0"
 redis = "^5.0.1"
 celery = {extras = ["pytest", "redis"], version = "^5.3.6"}
 watchdog = "^4.0.0"
+flower = "^2.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.0.0"
+pytest = "^8.0.1"
 black = "^24.2.0"
 pytest-cov = "^4.1.0"
 pre-commit = "^3.6.1"
@@ -37,12 +38,12 @@ interrogate = "^1.5.0"
 pytest-sugar = "^1.0.0"
 mkdocs-material = "^9.5.9"
 mkdocstrings = {extras = ["python"], version = "^0.24.0"}
-tox = {extras = ["toml"], version = "^4.12.1"}
+tox = {extras = ["toml"], version = "^4.13.0"}
 coverage = "^7.4.1"
 
 
 [tool.poetry.group.pytest.dependencies]
-pytest = "^8.0.0"
+pytest = "^8.0.1"
 pytest-cov = "^4.1.0"
 pytest-asyncio = "^0.23.5"
 pytest-local-badge = "^1.0.3"
@@ -50,7 +51,7 @@ pytest-sugar = "^1.0.0"
 
 
 [tool.poetry.group.mypy.dependencies]
-mypy = "^1.8.0"
+mypy = {extras = ["reports"], version = "^1.8.0"}
 types-all = "^1.0.0"
 pandas-stubs = "^2.1.4.231227"
 
@@ -145,7 +146,7 @@ badge-style = "flat"
 # free to run mypy on Windows, Linux, or macOS and get consistent
 # results.
 python_version="3.11"
-plugins="pydantic.mypy, numpy.typing.mypy_plugin"
+plugins="numpy.typing.mypy_plugin"
 pretty = true
 mypy_path = "stubs"
 show_column_numbers = true
@@ -177,9 +178,9 @@ show_error_context=true
 # No incremental mode
 cache_dir="/dev/null"
 # suppress errors about unsatisfied imports for untyped packages
-[[tool.mypy.overrides]]
-module = [
-    "minio.*",
-    "avengercon.minio.*",
-]
+#[[tool.mypy.overrides]]
+#module = [
+#    "minio.*",
+#    "avengercon.minio.*",
+#]
 ignore_missing_imports = true

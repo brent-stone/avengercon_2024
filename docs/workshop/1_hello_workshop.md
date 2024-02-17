@@ -172,3 +172,8 @@ approximation for "Stone")
     and `MINIO_ROOT_PASSWORD` values
 
     ![MinIO](1_images/minio.png)
+
+=== "Celery (Flower)"
+    [Celery :simple-celery:](http://celery.localhost:57073/){ .md-button .md-button--primary}
+
+    ![Celery](1_images/celery.png)

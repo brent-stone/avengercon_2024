@@ -2,6 +2,14 @@
 Redis client and related functionality
 """
 
+# This __future__ import annotations is needed to reconcile the 3.11 Python interpreter
+# from being upset at function declaration time about clarifying the Redis generic as
+# Redis[str] vs mypy being upset that the Redis type is left as a generic and needs to
+# be clarified. PEP 563 proposes the deferred evaluation of type annotations as default
+# behavior; however, this explicit import is needed to trigger that behavior in 3.11
+# https://peps.python.org/pep-0563/
+# https://discuss.python.org/t/type-annotations-pep-649-and-pep-563/11363/1
+from __future__ import annotations
 from typing import Optional
 
 from redis import Redis
