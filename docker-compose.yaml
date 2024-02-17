@@ -245,6 +245,60 @@ services:
       retries: 3
       start_period: 5s
 
+  dask-scheduler:
+    container_name: avengercon-dask-scheduler
+    image: ghcr.io/dask/dask:latest
+    hostname: dask-scheduler
+    ports:
+      - target: 8786  # scheduler port
+        mode: host
+      - target: 8787  # Bokeh scheduler GUI
+        mode: host
+    networks:
+      - avengercon
+    command: [ "dask-scheduler" ]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=avengercon
+      - traefik.http.services.avengercon-service-dask-scheduler.loadBalancer.server.port=8787
+      - traefik.http.services.avengercon-service-dask-scheduler.loadBalancer.server.scheme=http
+      - traefik.http.routers.avengercon-router-dask-scheduler.entrypoints=avengercon-entrypoint-web
+      - traefik.http.routers.avengercon-router-dask-scheduler.rule=Host(`${SUBDOMAIN_DASK}.${DOMAIN}`) && ${TRAEFIK_PRIVATE_IP_CLIENT_RULE}
+      - traefik.http.routers.avengercon-router-dask-scheduler.service=avengercon-service-dask-scheduler
+      - traefik.http.routers.avengercon-router-dask-scheduler.tls=false
+
+  dask-worker:
+    image: ghcr.io/dask/dask:latest
+    command: [ "dask-worker", "tcp://dask-scheduler:8786" ]
+    networks:
+      - avengercon
+    # For Docker swarm you can specify multiple workers, this is ignored by `docker-compose up`
+    deploy:
+      mode: replicated
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+
+  dask-notebook:
+    container_name: avengercon-dask-notebook
+    image: ghcr.io/dask/dask-notebook:latest-py3.11
+    ports:
+      - target: 8888
+        mode: host
+    networks:
+      - avengercon
+    environment:
+      - DASK_SCHEDULER_ADDRESS="tcp://dask-scheduler:8786"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=avengercon
+      - traefik.http.services.avengercon-service-dask-notebook.loadBalancer.server.port=8888
+      - traefik.http.services.avengercon-service-dask-notebook.loadBalancer.server.scheme=http
+      - traefik.http.routers.avengercon-router-dask-notebook.entrypoints=avengercon-entrypoint-web
+      - traefik.http.routers.avengercon-router-dask-notebook.rule=Host(`${SUBDOMAIN_NOTEBOOK}.${DOMAIN}`) && ${TRAEFIK_PRIVATE_IP_CLIENT_RULE}
+      - traefik.http.routers.avengercon-router-dask-notebook.service=avengercon-service-dask-notebook
+      - traefik.http.routers.avengercon-router-dask-notebook.tls=false
+
 # Note: For those that would like to enable TLS (HTTPS) services, re-enable this service
 # and copy paste your tunnel token into the .cloudflare.env file. Also be sure to declare
 # a 443 entrypoint with Traefik and swap out the commented settings with the HTTP config

@@ -182,3 +182,25 @@ approximation for "Stone")
     [Traefik :simple-traefikproxy:](http://proxy.localhost:57073/dashboard/#/){ .md-button .md-button--primary}
 
     ![Traefik](1_images/traefik.png)
+
+=== "Dask"
+    [Dask :simple-dask:](http://dask.localhost:57073/status){ .md-button .md-button--primary}
+
+    ![Dask](1_images/dask.png)
+
+=== "Notebook"
+    [Jupyter Notebook :simple-jupyter:](http://notebook.localhost:57073/){ .md-button .md-button--primary}
+
+    Your login token will be listed in the terminal next to an `avengercon-dask-notebook`
+    log entry. You'll need to copy-paste just the token portion of the url
+
+    ``` terminal hl_lines="2"
+    avengercon-dask-notebook       | [... ServerApp] Jupyter Server 2.12.5 is running at:
+    avengercon-dask-notebook       | [... ServerApp] http://fd52fdf68911:8888/lab?token=b952e22de792f69923d281c04f66393518cd74a0c7fd1acf
+                                                EVERYTHING AFTER THE = IS YOUR TOKEN    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    avengercon-dask-notebook       | [I 2024-02-17 19:42:45.576 ServerApp]     http://127.0.0.1:8888/lab?token=b952e22de792f69923d281c04f66393518cd74a0c7fd1acf
+    avengercon-dask-notebook       | [I 2024-02-17 19:42:45.576 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+    ```
+
+    ![Jupyter](1_images/jupyter.png)

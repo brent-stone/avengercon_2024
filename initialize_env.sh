@@ -24,6 +24,12 @@ rando_minio_access_key() {
 rando_minio_secret_key() {
   env LC_ALL=C tr -dc "$RANDOM_ALPHANUM_CORPUS" </dev/urandom | head -c 40
 }
+# Used to control the initial password setup token for the Dask Jupyter server. Must be
+# lowercase alphanumeric string of a default length of 48 characters
+RANDOM_ALPHANUM_CORPUS_LOWER="0123456789abcdefghijklmnopqrstuvwxyz"
+rando_jupyter_token() {
+  env LC_ALL=C tr -dc "$RANDOM_ALPHANUM_CORPUS_LOWER" </dev/urandom | head -c 48
+}
 
 ######### Variable Declarations #############
 
@@ -42,6 +48,8 @@ SUBDOMAIN_WHOAMI="whoami"
 SUBDOMAIN_CACHE="cache"
 SUBDOMAIN_MINIO="bucket"
 SUBDOMAIN_FLOWER="celery"
+SUBDOMAIN_DASK="dask"
+SUBDOMAIN_NOTEBOOK="notebook"
 
 # Traefik endpoint rule settings
 TRAEFIK_PRIVATE_IP_CLIENT_RULE="(ClientIP(\`10.0.0.0/8\`) || ClientIP(\`172.16.0.0/12\`) || ClientIP(\`192.168.0.0/16\`))"
@@ -76,6 +84,9 @@ MINIO_USE_SSL="false"
 MINIO_ROOT_USER="avengercon-minio"
 : "${MINIO_ROOT_PASSWORD:=$(rando_string)}"
 TEST_MINIO_ENDPOINT="${DOMAIN}:${TEST_MINIO_PORT}"
+
+# Dask Settings
+: "${DASK_JUPYTER_TOKEN:=$(rando_jupyter_token)}"
 
 # NOTE: If you'd like to use basic auth middleware with Traefik, you'll need to hash
 # the username and password.
@@ -120,6 +131,8 @@ else
     echo "SUBDOMAIN_CACHE=${SUBDOMAIN_CACHE}";
     echo "SUBDOMAIN_MINIO=${SUBDOMAIN_MINIO}";
     echo "SUBDOMAIN_FLOWER=${SUBDOMAIN_FLOWER}";
+    echo "SUBDOMAIN_DASK=${SUBDOMAIN_DASK}";
+    echo "SUBDOMAIN_NOTEBOOK=${SUBDOMAIN_NOTEBOOK}";
 
     echo "# FastAPI Settings";
     echo "GUNICORN_MAX_WORKERS=${GUNICORN_MAX_WORKERS}";
@@ -149,6 +162,9 @@ else
     echo "# Kombu isn't configured properly";
     echo "CELERY_BROKER_URL=${CELERY_BROKER_URL}";
     echo "CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}";
+
+    echo "# Dask settings";
+    echo "DASK_JUPYTER_TOKEN=${DASK_JUPYTER_TOKEN}";
   } >> $ENV_FILE
 fi
 
@@ -181,6 +197,8 @@ else
     echo "SUBDOMAIN_CACHE=${SUBDOMAIN_CACHE}";
     echo "SUBDOMAIN_MINIO=${SUBDOMAIN_MINIO}";
     echo "SUBDOMAIN_FLOWER=${SUBDOMAIN_FLOWER}";
+    echo "SUBDOMAIN_DASK=${SUBDOMAIN_DASK}";
+    echo "SUBDOMAIN_NOTEBOOK=${SUBDOMAIN_NOTEBOOK}";
 
     echo "# FastAPI Settings";
     echo "SECRET_KEY=${SECRET_KEY}";
