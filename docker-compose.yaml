@@ -55,11 +55,6 @@ services:
       - --entrypoints.avengercon-entrypoint-web.forwardedHeaders.insecure
       - --entrypoints.avengercon-entrypoint-web.http.middlewares=avengercon-http-whitelist@docker
 
-      # Define entrypoint for Traefik dashboard
-#      - --entrypoints.dashboard.address=:8080
-#      - --entrypoints.dashboard.http.redirections.entryPoint.to=web
-#      - --entrypoints.dashboard.http.redirections.entryPoint.scheme=http
-
       # Define entrypoint for direct Redis TCP connections
       - --entrypoints.avengercon-entrypoint-redis.address=:6379/tcp
 
@@ -71,9 +66,9 @@ services:
       - traefik.docker.network=avengercon
 
       # Enable dashboard routing
-      # Access the dashboard at https://proxy.localhost/dashboard/
-#      - traefik.http.services.traefik-service.loadBalancer.server.port=8080
-#      - traefik.http.services.traefik-service.loadBalancer.server.scheme=http
+      # Access the dashboard at http://proxy.localhost:57073/dashboard/#/
+      - traefik.http.services.traefik-service.loadBalancer.server.port=8080
+      - traefik.http.services.traefik-service.loadBalancer.server.scheme=http
       - traefik.http.routers.avengercon-router-traefik.entrypoints=avengercon-entrypoint-web
       - traefik.http.routers.avengercon-router-traefik.rule=Host(`${SUBDOMAIN_PROXY}.${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`)) && ${TRAEFIK_PRIVATE_IP_CLIENT_RULE}
       - traefik.http.routers.avengercon-router-traefik.service=api@internal

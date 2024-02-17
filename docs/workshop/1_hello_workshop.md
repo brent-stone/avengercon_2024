@@ -177,3 +177,8 @@ approximation for "Stone")
     [Celery :simple-celery:](http://celery.localhost:57073/){ .md-button .md-button--primary}
 
     ![Celery](1_images/celery.png)
+
+=== "Traefik"
+    [Traefik :simple-traefikproxy:](http://proxy.localhost:57073/dashboard/#/){ .md-button .md-button--primary}
+
+    ![Traefik](1_images/traefik.png)
