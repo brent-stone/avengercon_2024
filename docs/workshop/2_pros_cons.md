@@ -111,7 +111,7 @@ pause to double-check you CAN'T use it before using something else._
 
     ---
 
-    _This is the endgame :muscle: If your truly starting to scale but don't want to
+    _This is the endgame :muscle: If you're truly starting to scale but don't want to
     ditch Python, then your journey will probably lead here._
 
     **Pros:**
@@ -120,8 +120,8 @@ pause to double-check you CAN'T use it before using something else._
     Forces effective map-shuffle-reduce patterns
 
     :material-checkbox-marked-circle:{ .green }
-    Potentially fastest (with :simple-apacheflink: Apache Flink) and scales harder than
-    Chuck Norris can kick
+    Potentially fastest (with :simple-apacheflink: Apache Flink) and scales [harder than
+    Chuck Norris can kick](https://youtu.be/E6UTz_Doic8?si=pGZkyRAQVMxi-Ymh&t=22)
 
     :material-checkbox-marked-circle:{ .green }
     1st class support for streaming dataflows and all the complexity that goes along with
@@ -146,7 +146,7 @@ pause to double-check you CAN'T use it before using something else._
     Semi-linked to GCP's DataFlow implementation
 
     :octicons-x-circle-24:{ .red }
-    Chained dependencies cause update lags
+    Chained dependencies cause projects to be stuck with months old libraries
 
     :octicons-x-circle-24:{ .red }
     Semi-locked in options for sources and sinks
@@ -157,9 +157,10 @@ pause to double-check you CAN'T use it before using something else._
 ## When are all of these options a bad idea?
 
 Spending weeks learning a new language is likely going to be slower than writing
-something in a language you already know (CPython) today and running it. That said,
+something in a language you already know today (CPython) and running it. That said,
 CPython is very upfront about its role in the world and doesn't hide that it is a
-language that doesn't scale well.
+language that doesn't scale well. A proximate cause of this issue is [the GIL and its
+inability to support threading](https://peps.python.org/pep-0703/).
 
 This means a best case scenario uses orders of magnitude more memory to accomplish a
 task in a similar amount of time compared to a language that supports threading. Even if
@@ -167,7 +168,7 @@ we construct our solution to optimally use tricks like Dask Dataframes, RAPIDS, 
 `asyncio` to maximize C-based computations, we'll still be spinning up multiple Python
 interpreters with megabytes of overhead per instance.
 
-Python is great to get going and rapidly prototype a solution to problems. Once a
+Python is great to get going and rapidly prototype solutions. Once a
 project starts involving Gigabytes+ and Mbps+ of data, it's probably time to seriously
 consider incorporating a language that supports threads.
 
@@ -175,8 +176,7 @@ consider incorporating a language that supports threads.
 
 While this workshop is focused on **horizontally** scaling Python, it's worth making
 some honorable mentions for vertically scaling individual Python interpreters to be
-more performant. The theme here is: speed up CPython by using C (or other external
-language), not Python.
+more performant. The theme here is: speed up Python by minimizing the use of Python.
 
 <div class="grid cards" markdown>
 
@@ -213,7 +213,7 @@ language), not Python.
     You can install it with pip, write it in your `.py` files, and it looks like Python.
     BUT... you're not _really_ using Python anymore. Similar situation as Numba:
 
-    **Step 1**: Hop on a magic carpet with `#!python ti.init(arch=ti.cpu)`
+    **Step 1**: Hop on a magic carpet with `#!python ti.init(arch=ti.gpu)`
 
     **Step 2**: Put `#!python @ti.func` or `#!python @ti.kernel` above your function.
 
