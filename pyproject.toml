@@ -21,7 +21,6 @@ pydantic = "^2.6.1"
 pydantic-settings = "^2.2.0"
 fastapi = "^0.109.2"
 uvicorn = {extras = ["standard"], version = "^0.27.1"}
-pandas = "^2.2.0"
 redis = "^5.0.1"
 celery = {extras = ["pytest", "redis"], version = "^5.3.6"}
 watchdog = "^4.0.0"
@@ -53,7 +52,6 @@ pytest-sugar = "^1.0.0"
 [tool.poetry.group.mypy.dependencies]
 mypy = {extras = ["reports"], version = "^1.8.0"}
 types-all = "^1.0.0"
-pandas-stubs = "^2.1.4.231227"
 
 
 [tool.poetry.group.mkdocs.dependencies]

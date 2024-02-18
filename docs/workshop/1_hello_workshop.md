@@ -173,16 +173,6 @@ approximation for "Stone")
 
     ![MinIO](1_images/minio.png)
 
-=== "Celery (Flower)"
-    [Celery :simple-celery:](http://celery.localhost:57073/){ .md-button .md-button--primary}
-
-    ![Celery](1_images/celery.png)
-
-=== "Traefik"
-    [Traefik :simple-traefikproxy:](http://proxy.localhost:57073/dashboard/#/){ .md-button .md-button--primary}
-
-    ![Traefik](1_images/traefik.png)
-
 === "Dask"
     [Dask :simple-dask:](http://dask.localhost:57073/status){ .md-button .md-button--primary}
 
@@ -204,3 +194,13 @@ approximation for "Stone")
     ```
 
     ![Jupyter](1_images/jupyter.png)
+
+=== "Celery (Flower)"
+    [Celery :simple-celery:](http://celery.localhost:57073/){ .md-button .md-button--primary}
+
+    ![Celery](1_images/celery.png)
+
+=== "Traefik"
+    [Traefik :simple-traefikproxy:](http://proxy.localhost:57073/dashboard/#/){ .md-button .md-button--primary}
+
+    ![Traefik](1_images/traefik.png)

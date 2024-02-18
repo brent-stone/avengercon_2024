@@ -289,6 +289,8 @@ services:
       - avengercon
     environment:
       - DASK_SCHEDULER_ADDRESS="tcp://dask-scheduler:8786"
+    volumes:
+      - ./dask_examples:/home/jovyan/examples/extra
     labels:
       - traefik.enable=true
       - traefik.docker.network=avengercon
