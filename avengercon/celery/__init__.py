@@ -22,7 +22,7 @@ except (ImportError, AttributeError, ModuleNotFoundError) as e:
     exit(1)
 
 
-def verify_celery_connection(a_celery_server: Celery) -> bool:
+def verify_celery_connection(a_celery_server: Celery = celery_server) -> bool:
     """
     Verifies that the celery server is reachable
     Args:

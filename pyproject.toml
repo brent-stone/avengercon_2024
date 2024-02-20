@@ -18,24 +18,32 @@ documentation = "https://github.com/brent-stone/avengercon_2024"
 python = "^3.10"
 minio = "^7.2.4"
 pydantic = "^2.6.1"
-pydantic-settings = "^2.2.0"
-fastapi = "^0.109.2"
+pydantic-settings = "^2.2.1"
 uvicorn = {extras = ["standard"], version = "^0.27.1"}
+fastapi = "^0.109.2"
 redis = "^5.0.1"
 celery = {extras = ["pytest", "redis"], version = "^5.3.6"}
 watchdog = "^4.0.0"
 flower = "^2.0.1"
+apache-beam = "^2.54.0"
+# Set to specific versions to meet apache-beam downstream version req's
+# note: Poetry can't dynamically solve due to the dynamic and non-standard
+# setup.py + pyproject.toml used in the apache-beam repo
+# https://github.com/apache/beam/tree/master/sdks/python
+numpy = "1.24.4"
+pandas = "2.0.3"
+python-multipart = "^0.0.9"
 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.1"
 black = "^24.2.0"
 pytest-cov = "^4.1.0"
-pre-commit = "^3.6.1"
+pre-commit = "^3.6.2"
 mypy = "^1.8.0"
 interrogate = "^1.5.0"
 pytest-sugar = "^1.0.0"
-mkdocs-material = "^9.5.9"
+mkdocs-material = "^9.5.10"
 mkdocstrings = {extras = ["python"], version = "^0.24.0"}
 tox = {extras = ["toml"], version = "^4.13.0"}
 coverage = "^7.4.1"
@@ -55,7 +63,7 @@ types-all = "^1.0.0"
 
 
 [tool.poetry.group.mkdocs.dependencies]
-mkdocs-material = "^9.5.9"
+mkdocs-material = "^9.5.10"
 mkdocstrings = {extras = ["python"], version = "^0.24.0"}
 mkdocs-git-revision-date-localized-plugin = "^1.2.4"
 

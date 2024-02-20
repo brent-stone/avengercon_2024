@@ -301,6 +301,47 @@ services:
       - traefik.http.routers.avengercon-router-dask-notebook.service=avengercon-service-dask-notebook
       - traefik.http.routers.avengercon-router-dask-notebook.tls=false
 
+  api:
+    container_name: avengercon-api
+    image: avengercon-api
+    command:
+      /app/start-reload.sh
+    restart: always
+    ports:
+      - target: 8883
+        mode: host
+    networks:
+      - avengercon
+    build: *avengercon-build
+    env_file:
+      - .env
+    volumes:
+      - ./avengercon:/app/avengercon
+    depends_on:
+      redis:
+        condition: service_healthy
+      celery:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=avengercon
+      - traefik.http.services.avengercon-service-api.loadBalancer.server.port=8883
+      - traefik.http.services.avengercon-service-api.loadBalancer.server.scheme=http
+      - traefik.http.routers.avengercon-router-api.entrypoints=avengercon-entrypoint-web
+      - traefik.http.routers.avengercon-router-api.rule=Host(`${SUBDOMAIN_API}.${DOMAIN}`) && ${TRAEFIK_PRIVATE_IP_CLIENT_RULE}
+      - traefik.http.routers.avengercon-router-api.service=avengercon-service-api
+      - traefik.http.routers.avengercon-router-api.tls=false
+    healthcheck:
+      # Note: The INFO: health checks that appear in the logs are from Uvicorn, not curl
+      test: [ "CMD-SHELL",
+              "curl --fail --silent http://localhost:8883/docs || exit 1" ]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
 # Note: For those that would like to enable TLS (HTTPS) services, re-enable this service
 # and copy paste your tunnel token into the .cloudflare.env file. Also be sure to declare
 # a 443 entrypoint with Traefik and swap out the commented settings with the HTTP config

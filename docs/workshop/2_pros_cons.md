@@ -158,19 +158,15 @@ pause to double-check you CAN'T use it before using something else._
 
 Spending weeks learning a new language is likely going to be slower than writing
 something in a language you already know today (CPython) and running it. That said,
-CPython is very upfront about its role in the world and doesn't hide that it is a
-language that doesn't scale well. A proximate cause of this issue is [the GIL and its
-inability to support threading](https://peps.python.org/pep-0703/).
+CPython is very upfront about its inability to use threading. Python 3.12+ is beginning
+the slow process of overcoming the Global Interpreter Lock (GIL) inability to support
+multiple threads. Details are in [PEP 703](https://peps.python.org/pep-0703/).
 
-This means a best case scenario uses orders of magnitude more memory to accomplish a
-task in a similar amount of time compared to a language that supports threading. Even if
-we construct our solution to optimally use tricks like Dask Dataframes, RAPIDS, and
-`asyncio` to maximize C-based computations, we'll still be spinning up multiple Python
-interpreters with megabytes of overhead per instance.
-
-Python is great to get going and rapidly prototype solutions. Once a
-project starts involving Gigabytes+ and Mbps+ of data, it's probably time to seriously
-consider incorporating a language that supports threads.
+Until the GIL supports threads and the Python ecosystem (SciPy, Dask, FastAPI, etc.)
+adapts to the change, the best case scenario with Python is multiprocessing using
+orders of magnitude more memory, layers of complexity, and slightly more time to
+accomplish a task compared to what compiled languages with threading can accomplish with
+basic functions.
 
 ## Vertically scaling "Python"
 
@@ -217,7 +213,7 @@ more performant. The theme here is: speed up Python by minimizing the use of Pyt
 
     **Step 2**: Put `#!python @ti.func` or `#!python @ti.kernel` above your function.
 
-    **Step 3**: Magic _(don't forget to use your third wish to free the genie)_
+    **Step 3**: Magic
 
 </div>
 

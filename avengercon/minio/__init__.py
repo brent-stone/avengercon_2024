@@ -12,9 +12,7 @@ from urllib3.exceptions import MaxRetryError
 from avengercon.logger import logger
 from avengercon.minio.config import minio_config
 from avengercon.minio.schemas import BucketCreationResult
-from fastapi import UploadFile
 from minio.helpers import ObjectWriteResult
-from os import stat
 
 
 def get_minio_client() -> Optional[Minio]:
@@ -64,7 +62,7 @@ def create_buckets(a_bucket_names: Iterable[str]) -> BucketCreationResult:
 
 def put_data(
     a_bucket_name: str,
-    a_file_name: str,
+    a_file_name: Optional[str],
     a_file_size: int,
     a_file: BinaryIO,
     a_auto_create: bool = True,
@@ -84,9 +82,12 @@ def put_data(
     Returns: True upon success; False otherwise
 
     """
-    # if not isinstance(a_file.filename, str):
-    #     logger.warning(f"Invalid filename: {a_file.filename}")
-    #     return False
+    if a_file_size <= 0:
+        logger.info(f"Invalid file size: {a_file_size}")
+        return False
+    if not isinstance(a_file_name, str) or not bool(a_file_name):
+        logger.info(f"Invalid file name: {a_file_name}")
+        return False
     l_client: Optional[Minio] = get_minio_client()
     if not isinstance(l_client, Minio):
         return False
@@ -94,25 +95,29 @@ def put_data(
         if a_auto_create:
             try:
                 l_client.make_bucket(a_bucket_name)
+                logger.info(f"Bucket created: {a_bucket_name}")
             except (MinioException, MaxRetryError, ValueError) as e:
                 logger.warning(e)
                 return False
         else:
+            logger.info(f"Bucket doesn't exist: {a_bucket_name}")
             return False
     try:
         # l_file_size: int = stat(a_file.file.fileno()).st_size
-        logger.info(f"Uploading {a_file_name} of size {a_file_size}")
+        logger.info(
+            f"Uploading {a_file_name} [{a_file_size} bytes] to bucket "
+            f"{a_bucket_name}",
+        )
         # Note: fput_object() will close the file descriptor but the calling function
         # (likely a FastAPI route with UploadFile) may be expecting to close the file
         # itself. Assume the caller is properly managing their file descriptors and use
         # put_object() instead.
-        l_result: ObjectWriteResult = l_client.put_object(
+        _: ObjectWriteResult = l_client.put_object(
             bucket_name=a_bucket_name,
             object_name=a_file_name,
             data=a_file,
             length=a_file_size,
         )
-        logger.info(f"{a_file_name} loaded into {l_result.object_name}")
         return True
     except (MinioException, MaxRetryError, ValueError, TypeError) as e:
         logger.warning(e)
