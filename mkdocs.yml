@@ -1,0 +1,109 @@
+site_name: Avengercon VIII Workshop
+site_description: Avengercon VIII Workshop--Horizontally Scaling Python for Production
+strict: true
+repo_name: brent-stone/avengercon_2024
+repo_url: https://github.com/brent-stone/avengercon_2024
+edit_uri: edit/main/docs/
+
+watch:
+  - avengercon
+
+extra_css:
+  - stylesheets/extra.css
+
+theme:
+  name: 'material'
+  palette:
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+    primary: blue grey
+    accent: teal
+    toggle:
+      icon: material/lightbulb-outline
+      name: "Switch to dark mode"
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    primary: blue grey
+    accent: teal
+    toggle:
+      icon: material/lightbulb
+      name: "Switch to light mode"
+  features:
+    - content.tabs.link
+    - content.code.annotate
+    - content.code.copy
+    - announce.dismiss
+    - navigation.tabs
+    - navigation.top
+    - navigation.footer
+    - content.action.view
+    - content.action.edit
+  logo: 'cyber_branch.png'
+  favicon: 'favicon.png'
+
+# https://www.mkdocs.org/user-guide/configuration/#validation
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+
+nav:
+  - Home: index.md
+  - Workshop:
+    - Hello, Workshop!: workshop/1_hello_workshop.md
+    - Parallel Pros and Cons: workshop/2_pros_cons.md
+  - Other Information:
+      - Cloudflare: developers/cloudflare.md
+      - Docker: developers/docker.md
+      - Documentation: developers/docs.md
+      - GitLab CI: developers/gitlab_ci.md
+      - Operating Systems: developers/os.md
+      - PostgreSQL: developers/postgres.md
+      - References: developers/developer_references.md
+      - SQLAlchemy & Alembic: developers/sqlalchemy_alembic.md
+      - Testing: developers/testing.md
+
+markdown_extensions:
+- tables
+- toc:
+    permalink: true
+    title: Page contents
+- admonition
+- pymdownx.details
+- pymdownx.superfences
+- pymdownx.highlight:
+    pygments_lang_class: true
+- pymdownx.extra
+- pymdownx.emoji:
+    emoji_index: !!python/name:material.extensions.emoji.twemoji
+    emoji_generator: !!python/name:material.extensions.emoji.to_svg
+- pymdownx.tabbed:
+    alternate_style: true
+# Enable inline HTML and CSS
+# https://squidfunk.github.io/mkdocs-material/reference/tooltips/#configuration
+- abbr
+- attr_list
+- pymdownx.snippets
+- md_in_html
+- pymdownx.inlinehilite
+
+plugins:
+  - search
+  # https://squidfunk.github.io/mkdocs-material/plugins/offline/#config.enabled
+  - offline:
+      enabled: !ENV [MKDOCS_OFFLINE, false]
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [.]
+          options:
+            members_order: source
+            separate_signature: true
+            filters: ["!^_"]
+            docstring_options:
+              ignore_init_summary: true
+            merge_init_into_class: true
+  - git-revision-date-localized:
+      enabled: !ENV [CI, false]
+      type: date
+      enable_creation_date: true

@@ -1,0 +1,68 @@
+#default_language_version:
+#    python: python3.11
+fail_fast: true
+
+repos:
+    # Using this mirror lets us use mypyc-compiled black, which is about 2x faster
+    - repo: https://github.com/psf/black-pre-commit-mirror
+      rev: 24.2.0
+      hooks:
+          - id: black
+            # It is recommended to specify the latest version of Python
+            # supported by your project here, or alternatively use
+            # pre-commit's default_language_version, see
+            # https://pre-commit.com/#top_level-default_language_version
+            language_version: python3.11
+    -   repo: https://github.com/pre-commit/pre-commit-hooks
+        rev: v4.5.0
+        hooks:
+        -   id: end-of-file-fixer
+            files: ^.idea/
+        -   id: trailing-whitespace
+            exclude: ^site/
+        -   id: check-executables-have-shebangs
+        -   id: check-json
+        -   id: check-toml
+        -   id: check-yaml
+            args: ['--unsafe']
+        -   id: detect-private-key
+        -   id: detect-aws-credentials
+            args: ['--allow-missing-credentials']
+        -   id: check-docstring-first
+        -   id: mixed-line-ending
+            args: ['--fix=auto']
+        -   id: name-tests-test
+            exclude: data.py
+        -   id: pretty-format-json
+            args: ['--autofix']
+        -   id: check-merge-conflict
+        -   id: debug-statements
+        -   id: no-commit-to-branch
+            # Both master and main are protected by default. Merge requests only.
+        -   id: check-case-conflict
+        -   id: check-byte-order-marker
+    -   repo: https://github.com/asottile/add-trailing-comma
+        rev: v3.1.0
+        hooks:
+        -   id: add-trailing-comma
+            args: [--py35-plus]
+    - repo: https://github.com/codespell-project/codespell
+      rev: v2.2.6
+      hooks:
+      - id: codespell
+        args:
+            - -w
+        additional_dependencies:
+          - tomli
+        exclude: '^.idea|^.venv|^.tox|^scripts'
+        exclude_types: [javascript]
+    -   repo: https://github.com/PyCQA/bandit
+        rev: 1.7.7
+        hooks:
+        -   id: bandit
+            language_version: python3
+            exclude: '^.idea|^.venv|^.tox|^scripts|^tests'
+            args:
+            -   -s
+            -   B101,B104
+exclude: '(site|.tox|.venv|.pytest_cache)/.*'
