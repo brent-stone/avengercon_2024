@@ -8,11 +8,16 @@ workshop:
 
     ---
 
-    _For when you just need one or two functions to scale. Chances a good that if you
-    try to make anything non-trivial, you're going to invest weeks of effort to
-    discover you've made a junk version of Dask v0.1 or Celery v0.1. If you don't know
-    what a [lamport clock](https://martinfowler.com/articles/patterns-of-distributed-systems/lamport-clock.html)
-    is, this option probably isn't for you._
+    _For when you just need one or two functions to scale. Chances are good that if you
+    try to make anything non-trivial, you're going to invest weeks/months of effort to
+    discover you've made a junk version of Dask or Celery released 10 years ago.
+
+    !!! quote "Self-authored multiprocessing"
+        _**Process #1**_: _Knock, Knock_
+
+        _**Process #2**_: _Whose th_**RACE CONDITION FROM PROCESS #1 BECAUSE YOU DIDN'T
+        USE MULTIPROCESSING CORRECTLY**
+
 
     **Pros:**
 
@@ -62,7 +67,7 @@ pause to double-check you CAN'T use it before using something else._
     **Cons:**
 
     :octicons-x-circle-24:{ .red }
-    Centered around Pandas (columnar data)
+    Centered around Pandas (columnar data, sorry JSON)
 
     :octicons-x-circle-24:{ .red }
     Complex workflows aren't a strong suit
@@ -183,6 +188,16 @@ more performant. The theme here is: speed up Python by minimizing the use of Pyt
     This likely isn't new information, but directly [extending Python with C or C++](https://docs.python.org/3/extending/extending.html)
     is how Numpy, Pandas, and much of the CPython standard library is made.
 
+    ---
+
+    **Pros:**
+
+    :material-checkbox-marked-circle:{ .green } You're that dev who can optimize Python with C :fontawesome-solid-hat-wizard:
+
+    **Cons:**
+
+    :octicons-x-circle-24:{ .red } You're the dev trying to optimize Python with C :material-emoticon-poop:
+
 -   :material-language-c:{ .lg .middle } __Compile and Cache Python__
 
     ---
@@ -194,27 +209,98 @@ more performant. The theme here is: speed up Python by minimizing the use of Pyt
     Chances are pretty good that the Python interpreter is already compiling your code
     to `.pyc` files.
 
+    ---
+
+    **Pros:**
+
+    :material-checkbox-marked-circle:{ .green } 1,000x performance increase with 1-line
+    of code and no added dependencies
+
+    **Cons:**
+
+    :octicons-x-circle-24:{ .red } If it works and memory holds out :pray_tone3:
+
 -   :simple-numba:{ .lg .middle } __[Numba](https://numba.pydata.org/)__
 
     ---
 
-    **Step 1**. Put `#!python @njit` above `#!python def my_function()`
+    **Step 1**. Put `#!python @jit` above `#!python def my_function()`
 
     **Step 2**. Magic
 
--   :simple-taichilang:{ .lg .middle } __Embedding [Taichi](https://www.taichi-lang.org/) into Python__
+    ---
+
+    **Pros:**
+
+    :material-checkbox-marked-circle:{ .green } Possibility of quick-win 1,000x or more
+    performance increases for your project
+
+    :material-checkbox-marked-circle:{ .green } Junior devs will think you're an all
+    knowing Python god for greatly speeding up the Python codebase
+
+    **Cons:**
+
+    :octicons-x-circle-24:{ .red } If it works...
+
+    :octicons-x-circle-24:{ .red } About as likely as a used mattress to introduce :octicons-bug-24:
+
+    :octicons-x-circle-24:{ .red } Your time is probably better spent learning a
+    threaded language rather than a bolt on solution for Python
+
+    :octicons-x-circle-24:{ .red } Senior devs will probably be annoyed you've increased
+    the complexity/fragility of the codebase and bloated prod images
+
+-   :simple-taichilang:{ .lg .middle } __[Taichi](https://www.taichi-lang.org/)__
 
     ---
 
     You can install it with pip, write it in your `.py` files, and it looks like Python.
     BUT... you're not _really_ using Python anymore. Similar situation as Numba:
 
-    **Step 1**: Hop on a magic carpet with `#!python ti.init(arch=ti.gpu)`
+    **Step 1**: Hop on a magic carpet with `#!python ti.init(arch=ti.cpu)`
 
-    **Step 2**: Put `#!python @ti.func` or `#!python @ti.kernel` above your function.
+    **Step 2**: Put `#!python @ti.kernel` above your function.
 
     **Step 3**: Magic
 
+    ---
+
+    **Pros/Cons:**
+
+    Similar tradeoffs as Numba
+
 </div>
 
+### Taichi advertised benchmark
 [![Benchmarks](2_images/benchmark_numba_cuda_taichi.png)](https://docs.taichi-lang.org/blog/taichi-compared-to-cub-cupy-numba)
+
+### Plain Python **vs** lru_cache **vs** Taichi **vs** Numba
+!!! tip "Fibonacci Number Benchmarks"
+    The benchmark below is reproducible by running the standalone tests included in the
+    workshop's `tests` directory:
+
+    `pytest tests/vertical_scale_test.py --benchmark-histogram`
+
+Key observations from setting up a benchmark for a somewhat "normal" Python function:
+
+1. For idempotent functions called "a lot" with similar input, adding
+`#!python @lru_cache` above the function definition is almost certainly the best option.
+
+2. Just-in-time (JIT) compiled solutions (e.g. Taichi & Numba) implicitly fail when
+reaching C max/min scalar sizes. Both silently failed when trying to compute numbers
+larger than the underlying C can support.
+
+3. Taichi is more "honest" about its limitations. Numba will implicitly fall back to
+Python without warning (e.g. the `#!python fib_numba()` test function) when its
+assumptions (which in general are the same as Taichi's) aren't met.
+
+4. Added complexity to debug. For example Taichi requires explicitly turning on debugging
+in its setup: `#!python taichi.init(debug=True)`
+
+5. If you're writing custom mathematical computation functions **AND** those
+functions are a clear bottleneck for the project goals **AND** function input isn't
+expected to be repetitive (so cache hits won't help) **AND** the math can't be done
+using native numpy/pandas or machine learning library functions **THEN** it **MAY** make
+sense to look at optimization solutions like Numba or Taichi.
+
+[![Benchmark](2_images/benchmark_lrucache_numba_taichi.svg)](2_images/benchmark_lrucache_numba_taichi.svg)
