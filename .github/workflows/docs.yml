@@ -19,7 +19,9 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
       - uses: actions/setup-python@main
         with:
-          python-version: 3.x
+          python-version: '3.11'
+          cache: 'pip'
+      - run: pip install -r requirements/requirements-mkdocs.txt
 
       - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
       - uses: actions/cache@main
@@ -29,5 +31,4 @@ jobs:
           restore-keys: |
             mkdocs-material-
 
-      - run: pip install mkdocs-material mkdocstrings[python]
       - run: mkdocs gh-deploy --force
