@@ -37,7 +37,7 @@ The Global Interpreter Lock (GIL) means that a Python interpreter is effectively
 single-threaded and can't take advantage of modern processors' capacity for parallel
 computation. Laterally scaling workloads across many Python interpreters is one of the
 most viable workarounds to the shortcomings of the GIL. This workshop will introduce you
-to two leading frameworks for doing this: Celery, Dask, and Apache Beam.
+to leading frameworks for doing this: Celery, Dask, and Apache Beam.
 This workshop will walk through establishing an Extract, Transform, Load (ETL) pipeline
 in each framework which reads and writes from Redis and a MinIO locally hosted S3
 bucket.
