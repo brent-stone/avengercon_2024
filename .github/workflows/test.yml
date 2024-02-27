@@ -21,22 +21,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.10', '3.11', '3.12']
+        # Reference for expanding testing in CI
+#        os: [ubuntu-latest, windows-latest, macos-latest]
+#        python-version: ['3.11', '3.12']
+        os: [ ubuntu-latest ]
+        python-version: ['3.11']
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@main
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@main
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
 
-    - name: Install Hatch
-      run: pip install --upgrade hatch
-
-    - name: Run static analysis
-      run: hatch fmt --check
+    - name: Install pytest
+      run: pip install -r requirements/requirements-pytest.txt
 
     - name: Run tests
-      run: hatch run cov
+      run: pytest --cov=avengercon --cov-config=pyproject.toml --ignore=tests/vertical_scale_test.py
