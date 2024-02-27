@@ -1,0 +1,57 @@
+FROM python:3.11-slim as requirements
+
+WORKDIR /tmp
+RUN mkdir -p requirements
+RUN pip install --upgrade pip poetry
+RUN poetry self add poetry-plugin-export
+COPY ./pyproject.toml pyproject.toml
+COPY ./poetry.lock poetry.lock
+COPY ./scripts/export_poetry_to_req_txt.sh export_poetry_to_req_txt.sh
+RUN chmod +x export_poetry_to_req_txt.sh
+RUN ./export_poetry_to_req_txt.sh
+
+FROM ghcr.io/dask/dask:2024.2.1-py3.11 as dask
+
+USER root
+# Mitigate the issue when running a flow with DaskTaskRunner
+# RuntimeError: Unable to find any timezone configuration
+# https://github.com/PrefectHQ/prefect/issues/3061
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -y && apt-get install -y tzdata
+# Cleanup the apt cache
+RUN apt-get purge -y --auto-remove
+RUN rm -rf /var/lib/apt/lists/*
+USER $NB_USER
+
+COPY --from=requirements /tmp/requirements/requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+# Add Avengercon code base
+COPY ./README.md README.md
+COPY ./pyproject.toml pyproject.toml
+COPY ./avengercon avengercon
+RUN pip install ./
+
+ENV TZ="America/New_York"
+#RUN cp /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+FROM ghcr.io/dask/dask-notebook:2024.2.1-py3.11 as notebook
+
+USER root
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -y && apt-get install -y tzdata
+# Cleanup the apt cache
+RUN apt-get purge -y --auto-remove
+RUN rm -rf /var/lib/apt/lists/*
+USER $NB_USER
+
+COPY --from=requirements /tmp/requirements/requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+# Add Avengercon code base
+COPY ./README.md README.md
+COPY ./pyproject.toml pyproject.toml
+COPY ./avengercon avengercon
+RUN pip install ./
+
+ENV TZ="America/New_York"

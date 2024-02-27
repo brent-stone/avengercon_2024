@@ -5,7 +5,7 @@ To quickly verify whether a Dockerfile is properly configured, try independently
 
 For example, with the Api.Dockerfile:
 ```bash
-docker build -t <image_name> -f Api.Dockerfile .
+docker build -t <image_name> -f <dockerfile_path> .
 ```
 
 ### Docker Commands
@@ -27,9 +27,3 @@ Docker compose 2 looks for `docker-compose.yml` to begin orchestration. However,
 also looks at `docker-compose.override.yml` to override/merge the settings from the base
 configuration. See the [merge compose files](https://docs.docker.com/compose/multiple-compose-files/merge/)
 documentation for the detailed rules on how this happens.
-
-- `docker-compose.override.yml` is the 'dev' settings enabling hot reload and mounting
-local files into the backend and frontend containers.
-
-- `docker-compose.yml` forgoes dev only services, hot reload, and local file system mounting.
-

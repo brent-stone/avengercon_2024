@@ -10,7 +10,7 @@ workshop:
 
     _For when you just need one or two functions to scale. Chances are good that if you
     try to make anything non-trivial, you're going to invest weeks/months of effort to
-    discover you've made a junk version of Dask or Celery released 10 years ago.
+    discover you've made a junk version of Dask or Celery released 10 years ago._
 
     !!! quote "Self-authored multiprocessing"
         _**Process #1**_: _Knock, Knock_
@@ -96,7 +96,7 @@ pause to double-check you CAN'T use it before using something else._
     Quirky but relatively painless infrastructure
 
     :material-checkbox-marked-circle:{ .green }
-    Probably supports where you store your data
+    Probably [supports where you store your data](https://docs.celeryq.dev/en/stable/userguide/configuration.html)
 
     **Cons:**
 

@@ -36,6 +36,6 @@ walks through each step of the process.
 - `docker login registry.gitlab.com`
   - Use a personal access token for your password
 - Use a URL style tag for the image then build it.
-  - `docker build -t registry.gitlab.com/stoneguard-software/autoai/<image_name> .`
+  - `docker build -t registry.gitlab.com/my-group/my-project/<image_name> .`
 - Use the URL style tag to then push to the container registry.
-  - `docker push registry.gitlab.com/stoneguard-software/autoai/autoai-backend-prod`
+  - `docker push registry.gitlab.com/my-group/my-project/<container_name>`

@@ -178,7 +178,7 @@ approximation for "Stone")
 
     ![Dask](1_images/dask.png)
 
-=== "Notebook"
+=== "Dask Notebook"
     [Jupyter Notebook :simple-jupyter:](http://notebook.localhost:57073/){ .md-button .md-button--primary}
 
     Your login token will be listed in the terminal next to an `avengercon-dask-notebook`
@@ -195,26 +195,15 @@ approximation for "Stone")
 
     ![Jupyter](1_images/jupyter.png)
 
+=== "Prefect"
+    [Prefect :simple-prefect:](http://prefect.localhost:57073/dashboard){ .md-button .md-button--primary}
+
+    ![Prefect](1_images/prefect.png)
+
 === "Celery (Flower)"
     [Celery :simple-celery:](http://celery.localhost:57073/){ .md-button .md-button--primary}
 
     ![Celery](1_images/celery.png)
-
-=== "Tour of Beam*"
-    [Tour of Beam :simple-apache:](https://tour.beam.apache.org/){ .md-button .md-button--primary}
-
-    !!! note "External service"
-        **Tour of Beam** is a fully hosted crash course maintained by the Beam authors
-        and won't be running on our local system. Those that would like to try
-        self-hosting are encouraged to instead look at the
-        ["Beam Playground source code"](https://github.com/apache/beam/tree/master/playground)
-        which includes a docker compose based deployment. As with the ["Tour
-        of Beam source code"](https://github.com/apache/beam/tree/master/learning/tour-of-beam), the
-        ["Beam Playground" has a fully-hosted interactive browser-based interpreter](https://play.beam.apache.org/)
-        to try out Apache Beam. "Tour of Beam" relies on "Beam Playground" and
-        Google Cloud Platform (GCP).
-
-    ![Tour of Beam](1_images/beam.png)
 
 === "Traefik"
     [Traefik :simple-traefikproxy:](http://proxy.localhost:57073/dashboard/#/){ .md-button .md-button--primary}

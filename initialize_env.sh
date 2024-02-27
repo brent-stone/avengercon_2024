@@ -50,6 +50,7 @@ SUBDOMAIN_MINIO="bucket"
 SUBDOMAIN_FLOWER="celery"
 SUBDOMAIN_DASK="dask"
 SUBDOMAIN_NOTEBOOK="notebook"
+SUBDOMAIN_PREFECT="prefect"
 
 # Traefik endpoint rule settings
 TRAEFIK_PRIVATE_IP_CLIENT_RULE="(ClientIP(\`10.0.0.0/8\`) || ClientIP(\`172.16.0.0/12\`) || ClientIP(\`192.168.0.0/16\`))"
@@ -87,6 +88,42 @@ TEST_MINIO_ENDPOINT="${DOMAIN}:${TEST_MINIO_PORT}"
 
 # Dask Settings
 : "${DASK_JUPYTER_TOKEN:=$(rando_jupyter_token)}"
+DASK_SCHEDULER_ADDRESS="tcp://dask-scheduler:8786"
+TEST_DASK_SCHEDULER_TCP_PORT="57080"
+TEST_DASK_SCHEDULER_ADDRESS="tcp://${DOMAIN}:${TEST_DASK_SCHEDULER_TCP_PORT}"
+
+# Prefect Settings
+PREFECT_API_URL="${PREFECT_API_URL:-http://${SUBDOMAIN_PREFECT}.${DOMAIN}:${HTTP_PORT}/api}"
+PREFECT_UI_API_URL="${PREFECT_UI_API_URL:-http://${SUBDOMAIN_PREFECT}.${DOMAIN}:${HTTP_PORT}/api}"
+PREFECT_SERVER_API_HOST="prefect"
+PREFECT_SERVER_API_PORT="4200"
+PREFECT_LOGGING_SERVER_LEVEL="${PREFECT_LOGGING_SERVER_LEVEL:-$LOG_LEVEL}"
+PREFECT_LOGGING_EXTRA_LOGGERS="dask,scipy"
+# As of Dec 23, Prefect's OSS codebase doesn't elegantly handle passwords with special
+# characters. This preemptively URL encodes the database password to avoid parsing issues.
+#PREFECT_API_DATABASE_PASSWORD_PLAIN="${PREFECT_API_DATABASE_PASSWORD:-$RANDOM_PREFECT_PW}"
+#PREFECT_API_DATABASE_PASSWORD=$(string_url_encode "$PREFECT_API_DATABASE_PASSWORD_PLAIN")
+#PREFECT_DB_USERNAME=autoai-prefect
+#PREFECT_DB_NAME=prefect
+
+# Bash escape is \ Docker compose escape is $ We ultimate need the double $$ to appear
+# in the provided docker compose environment variable, thus \$\$
+#PREFECT_API_DATABASE_CONNECTION_URL="postgresql+asyncpg://${PREFECT_DB_USERNAME}:\$\${PREFECT_API_DATABASE_PASSWORD}@${POSTGRES_SERVER}:5432/${PREFECT_DB_NAME}"
+# Passing a URL encoded password via variable substitution on a client/agent is problematic as both Docker and the Python
+# dotenv package (via pydantic-settings) will attempt to perform the substitution. However, Prefect expects the placeholder
+# to remain, e.g. part_of_string:${PASSWORD}@rest_of_string within the environment variable if using the
+# PREFECT_API_DATABASE_PASSWORD. Thus, for agents and flow development/testing, simply forgo using the separate config
+# incline a URL encoded password to the DATABASE_CONNECTION_URL.
+#PREFECT_API_DATABASE_CONNECTION_URL_ESCAPED="postgresql+asyncpg://${PREFECT_DB_USERNAME}:${PREFECT_API_DATABASE_PASSWORD}@${POSTGRES_SERVER}:5432/${PREFECT_DB_NAME}"
+
+#PREFECT_API_DATABASE_ECHO="False"
+#PREFECT_API_DATABASE_MIGRATE_ON_START="True"
+# Unofficial variables for prefect server
+PREFECT_MINIO_ACCESS_KEY="${PREFECT_MINIO_ACCESS_KEY:-$(rando_minio_access_key)}"
+PREFECT_MINIO_SECRET_KEY="${PREFECT_MINIO_SECRET_KEY:-$(rando_minio_secret_key)}"
+PREFECT_MINIO_FLOWS_BUCKET_NAME="prefect-flows"
+PREFECT_MINIO_ARTIFACTS_BUCKET_NAME="prefect-artifacts"
+
 
 # NOTE: If you'd like to use basic auth middleware with Traefik, you'll need to hash
 # the username and password.
@@ -133,6 +170,7 @@ else
     echo "SUBDOMAIN_FLOWER=${SUBDOMAIN_FLOWER}";
     echo "SUBDOMAIN_DASK=${SUBDOMAIN_DASK}";
     echo "SUBDOMAIN_NOTEBOOK=${SUBDOMAIN_NOTEBOOK}";
+    echo "SUBDOMAIN_PREFECT=${SUBDOMAIN_PREFECT}";
 
     echo "# FastAPI Settings";
     echo "GUNICORN_MAX_WORKERS=${GUNICORN_MAX_WORKERS}";
@@ -164,7 +202,23 @@ else
     echo "CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}";
 
     echo "# Dask settings";
+    echo "DASK_SCHEDULER_ADDRESS=${DASK_SCHEDULER_ADDRESS}";
     echo "DASK_JUPYTER_TOKEN=${DASK_JUPYTER_TOKEN}";
+    echo "TEST_DASK_SCHEDULER_TCP_PORT=${TEST_DASK_SCHEDULER_TCP_PORT}";
+
+    echo "# Prefect settings";
+    echo "# https://docs.prefect.io/latest/api-ref/prefect/settings";
+    echo "PREFECT_API_URL=${PREFECT_API_URL}";
+    echo "PREFECT_UI_API_URL=${PREFECT_UI_API_URL}";
+    echo "PREFECT_SERVER_API_HOST=${PREFECT_SERVER_API_HOST}"
+    echo "PREFECT_SERVER_API_PORT=${PREFECT_SERVER_API_PORT}"
+    echo "PREFECT_LOGGING_SERVER_LEVEL=${PREFECT_LOGGING_SERVER_LEVEL}"
+    echo "PREFECT_LOGGING_EXTRA_LOGGERS=${PREFECT_LOGGING_EXTRA_LOGGERS}";
+    echo "# Unofficial Prefect server configuration values";
+    echo "PREFECT_MINIO_ACCESS_KEY=${PREFECT_MINIO_ACCESS_KEY}";
+    echo "PREFECT_MINIO_SECRET_KEY=${PREFECT_MINIO_SECRET_KEY}";
+    echo "PREFECT_MINIO_FLOWS_BUCKET_NAME=${PREFECT_MINIO_FLOWS_BUCKET_NAME}";
+    echo "PREFECT_MINIO_ARTIFACTS_BUCKET_NAME=${PREFECT_MINIO_ARTIFACTS_BUCKET_NAME}";
   } >> $ENV_FILE
 fi
 
@@ -225,6 +279,24 @@ else
     echo "# Kombu isn't configured properly";
     echo "CELERY_BROKER_URL=${TEST_CELERY_BROKER_URL}";
     echo "CELERY_RESULT_BACKEND=${TEST_CELERY_RESULT_BACKEND}";
+
+    echo "# Dask settings";
+    echo "DASK_JUPYTER_TOKEN=${DASK_JUPYTER_TOKEN}";
+    echo "DASK_SCHEDULER_ADDRESS=${TEST_DASK_SCHEDULER_ADDRESS}";
+
+    echo "# Prefect settings";
+    echo "# https://docs.prefect.io/latest/api-ref/prefect/settings";
+    echo "PREFECT_API_URL=${PREFECT_API_URL}";
+    echo "PREFECT_UI_API_URL=${PREFECT_UI_API_URL}";
+    echo "PREFECT_SERVER_API_HOST=${PREFECT_SERVER_API_HOST}"
+    echo "PREFECT_SERVER_API_PORT=${PREFECT_SERVER_API_PORT}"
+    echo "PREFECT_LOGGING_SERVER_LEVEL=${PREFECT_LOGGING_SERVER_LEVEL}"
+    echo "PREFECT_LOGGING_EXTRA_LOGGERS=${PREFECT_LOGGING_EXTRA_LOGGERS}";
+    echo "# Unofficial Prefect server configuration values";
+    echo "PREFECT_MINIO_ACCESS_KEY=${PREFECT_MINIO_ACCESS_KEY}";
+    echo "PREFECT_MINIO_SECRET_KEY=${PREFECT_MINIO_SECRET_KEY}";
+    echo "PREFECT_MINIO_FLOWS_BUCKET_NAME=${PREFECT_MINIO_FLOWS_BUCKET_NAME}";
+    echo "PREFECT_MINIO_ARTIFACTS_BUCKET_NAME=${PREFECT_MINIO_ARTIFACTS_BUCKET_NAME}";
   } >> $LOCALHOST_ENV_FILE
 fi
 

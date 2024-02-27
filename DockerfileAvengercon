@@ -18,7 +18,7 @@ FROM python:3.11-slim as base
 # https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#run
 # "Always combine RUN apt-get update with apt-get install in the same RUN statement."
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-    curl # \
+    curl
 #    gcc \
 #    g++ \
 #    libre2-dev \
