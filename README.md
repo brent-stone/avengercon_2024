@@ -11,16 +11,19 @@ https://docs.gitlab.com/ee/user/project/badges.html#view-the-url-of-pipeline-bad
 -->
 
 Tooling </br>
-![Python](docs/badges/pyversions.svg)
+![Python](docs/badges/python311.svg)
 [![Poetry](docs/badges/poetry.svg)](https://python-poetry.org/)
 [![Tox](docs/badges/tox.svg)](https://tox.wiki/)
 [![Black](docs/badges/black.svg)](https://black.readthedocs.io/en/stable/)
 [![Safety](docs/badges/safety.svg)](https://github.com/pyupio/safety)
 [![Bandit](docs/badges/bandit.svg)](https://github.com/PyCQA/bandit)
 
-[![mkdocs-material](docs/badges/mkdocs-material.svg)](https://squidfunk.github.io/mkdocs-material/)
 [![Celery](docs/badges/celery.svg)](https://docs.celeryq.dev/en/stable/getting-started/introduction.html)
+[![Dask](docs/badges/dask.svg)](https://www.dask.org/)
+[![Apache Beam](docs/badges/beam.svg)](https://beam.apache.org/#)
 [![Redis Stack](docs/badges/redis.svg)](https://redis.io/docs/about/about-stack/)
+[![MinIO](docs/badges/minio.svg)](https://min.io/)
+[![mkdocs-material](docs/badges/mkdocs-material.svg)](https://squidfunk.github.io/mkdocs-material/)
 
 See [the documentation](https://brent-stone.github.io/avengercon_2024/) for information
 on using this repo. The [Avengercon VIII conference](https://avengercon.com/)
