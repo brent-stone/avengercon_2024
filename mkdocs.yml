@@ -52,6 +52,9 @@ nav:
   - Workshop:
     - Hello, Workshop!: workshop/1_hello_workshop.md
     - Parallel Pros and Cons: workshop/2_pros_cons.md
+    - Dask & Prefect: workshop/3_dask.md
+    - Celery & Flower: workshop/4_celery.md
+    - Apache Beam: workshop/5_beam.md
   - Other Information:
       - Cloudflare: developers/cloudflare.md
       - Docker: developers/docker.md
@@ -59,9 +62,9 @@ nav:
       - GitLab CI: developers/gitlab_ci.md
       - Operating Systems: developers/os.md
       - PostgreSQL: developers/postgres.md
-      - References: developers/developer_references.md
       - SQLAlchemy & Alembic: developers/sqlalchemy_alembic.md
       - Testing: developers/testing.md
+      - Traefik: developers/traefik.md
 
 markdown_extensions:
 - tables

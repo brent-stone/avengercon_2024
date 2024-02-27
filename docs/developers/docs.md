@@ -21,8 +21,18 @@ is available to customize callouts.
 
 Examples:
 
+```markdown
 !!! note
     This is a note.
+```
+
+!!! note
+    This is a note.
+
+```markdown
+!!! warning
+    This is a warning.
+```
 
 !!! warning
     This is a warning.
@@ -30,6 +40,10 @@ Examples:
 ### Buttons and Icons
 The [icon search](https://squidfunk.github.io/mkdocs-material/reference/icons-emojis/#search)
 page has a quick lookup of available icons that mkdocs-material supports.
+
+```markdown
+[Send :fontawesome-solid-paper-plane:](#){ .md-button }
+```
 
 [Send :fontawesome-solid-paper-plane:](#){ .md-button }
 

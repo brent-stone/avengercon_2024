@@ -13,7 +13,8 @@ services:
     volumes:
       # Enable communication between Traefik and the docker daemon
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/data:/config
+      # maintain a local copy of the semi-auto generated config
+      # - ./traefik/data:/config
     ports:
       # Note: It's recommended to use a service like Let's Encrypt or Cloudflare Tunnels
       # to serve all web traffic through HTTPS. Then, split up this docker-compose.yaml
@@ -32,6 +33,10 @@ services:
       # Expose MinIO API [DEV ONLY]
       - target: 9000
         published: ${TEST_MINIO_PORT:?missing .env file with TEST_MINIO_PORT}
+        mode: host
+      # Expose Dask scheduler [DEV ONLY]
+      - target: 8786
+        published: ${TEST_DASK_SCHEDULER_TCP_PORT:?missing .env file with TEST_DASK_SCHEDULER_TCP_PORT}
         mode: host
     command:
       # Traefik Static Configuration Command Line Arguments
@@ -60,6 +65,9 @@ services:
 
       # Define entrypoint for direct MinIO TCP connections
       - --entrypoints.avengercon-entrypoint-minio.address=:9000/tcp
+
+      # Define entrypoint for direct Dask Scheduler TCP connections
+      - --entrypoints.avengercon-entrypoint-dask.address=:8786/tcp
     labels:
       # Enable Traefik for this service, to make it available in the public network
       - traefik.enable=true
@@ -247,7 +255,12 @@ services:
 
   dask-scheduler:
     container_name: avengercon-dask-scheduler
-    image: ghcr.io/dask/dask:latest
+    # https://docs.dask.org/en/latest/deploying-docker.html#docker-images
+    build: &avengercon-build-dask
+      context: ./
+      dockerfile: DockerfileAvengerconDask
+      target: dask
+#    image: ghcr.io/dask/dask:2024.2.1-py3.11
     hostname: dask-scheduler
     ports:
       - target: 8786  # scheduler port
@@ -260,6 +273,8 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=avengercon
+
+      # Dask dashboard webapp via traefik
       - traefik.http.services.avengercon-service-dask-scheduler.loadBalancer.server.port=8787
       - traefik.http.services.avengercon-service-dask-scheduler.loadBalancer.server.scheme=http
       - traefik.http.routers.avengercon-router-dask-scheduler.entrypoints=avengercon-entrypoint-web
@@ -267,8 +282,16 @@ services:
       - traefik.http.routers.avengercon-router-dask-scheduler.service=avengercon-service-dask-scheduler
       - traefik.http.routers.avengercon-router-dask-scheduler.tls=false
 
+      # Enable localhost direct TCP connection
+      - traefik.tcp.services.avengercon-service-dask-tcp.loadBalancer.server.port=8786
+      - traefik.tcp.routers.avengercon-router-dask-tcp.service=avengercon-service-dask-tcp
+      - traefik.tcp.routers.avengercon-router-dask-tcp.entryPoints=avengercon-entrypoint-dask
+      - traefik.tcp.routers.avengercon-router-dask-tcp.rule=HostSNI(`*`) && ${TRAEFIK_PRIVATE_IP_CLIENT_RULE}
+      - traefik.tcp.routers.avengercon-router-dask-tcp.tls=false
+
   dask-worker:
-    image: ghcr.io/dask/dask:latest
+    build: *avengercon-build-dask
+#    image: ghcr.io/dask/dask:2024.2.1-py3.11
     command: [ "dask-worker", "tcp://dask-scheduler:8786" ]
     networks:
       - avengercon
@@ -281,16 +304,20 @@ services:
 
   dask-notebook:
     container_name: avengercon-dask-notebook
-    image: ghcr.io/dask/dask-notebook:latest-py3.11
+#    image: ghcr.io/dask/dask-notebook:2024.2.1-py3.11
+    build:
+      context: ./
+      dockerfile: DockerfileAvengerconDask
+      target: notebook
     ports:
       - target: 8888
         mode: host
     networks:
       - avengercon
     environment:
-      - DASK_SCHEDULER_ADDRESS="tcp://dask-scheduler:8786"
+      - DASK_SCHEDULER_ADDRESS=${DASK_SCHEDULER_ADDRESS:?missing .env file with DASK_SCHEDULER_ADDRESS}
     volumes:
-      - ./dask_examples:/home/jovyan/examples/extra
+      - ./dask_examples:/home/jovyan/avengercon
     labels:
       - traefik.enable=true
       - traefik.docker.network=avengercon
@@ -342,6 +369,36 @@ services:
       retries: 3
       start_period: 5s
 
+  prefect:
+    container_name: avengercon-prefect
+    build:
+      context: ./
+      dockerfile: DockerfileAvengerconPrefect
+      target: development
+    command: prefect server start
+    ports:
+      - target: 4200
+        mode: host
+    networks:
+      - avengercon
+    volumes:
+      - prefect-volume:/root/.prefect
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
+    depends_on:
+      dask-scheduler:
+        condition: service_started
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=avengercon
+      - traefik.http.services.avengercon-service-prefect.loadBalancer.server.port=4200
+      - traefik.http.services.avengercon-service-prefect.loadBalancer.server.scheme=http
+      - traefik.http.routers.avengercon-router-prefect.entrypoints=avengercon-entrypoint-web
+      - traefik.http.routers.avengercon-router-prefect.rule=Host(`${SUBDOMAIN_PREFECT}.${DOMAIN}`) && ${TRAEFIK_PRIVATE_IP_CLIENT_RULE}
+      - traefik.http.routers.avengercon-router-prefect.service=avengercon-service-prefect
+      - traefik.http.routers.avengercon-router-prefect.tls=false
+
 # Note: For those that would like to enable TLS (HTTPS) services, re-enable this service
 # and copy paste your tunnel token into the .cloudflare.env file. Also be sure to declare
 # a 443 entrypoint with Traefik and swap out the commented settings with the HTTP config
@@ -367,6 +424,7 @@ services:
 volumes:
   redis-volume:
   minio-volume:
+  prefect-volume:
 
 networks:
   avengercon:

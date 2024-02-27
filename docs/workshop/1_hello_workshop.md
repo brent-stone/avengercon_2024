@@ -178,7 +178,7 @@ approximation for "Stone")
 
     ![Dask](1_images/dask.png)
 
-=== "Notebook"
+=== "Dask Notebook"
     [Jupyter Notebook :simple-jupyter:](http://notebook.localhost:57073/){ .md-button .md-button--primary}
 
     Your login token will be listed in the terminal next to an `avengercon-dask-notebook`
@@ -194,6 +194,11 @@ approximation for "Stone")
     ```
 
     ![Jupyter](1_images/jupyter.png)
+
+=== "Prefect"
+    [Prefect :simple-prefect:](http://prefect.localhost:57073/dashboard){ .md-button .md-button--primary}
+
+    ![Prefect](1_images/prefect.png)
 
 === "Celery (Flower)"
     [Celery :simple-celery:](http://celery.localhost:57073/){ .md-button .md-button--primary}

@@ -13,8 +13,4 @@ for Apache Beam which shows the need to package, maintain, and troubleshoot cust
 images for each execution environment a beam pipeline may try to execute. See the excerpt
 of this complex workflow for basic Apache Beam tasks below.
 
-![Beam Pipeline](beam_pipeline.png)
-
-## Configuring Traefik securely
-[Mozilla SSL Configuration Generator](https://ssl-config.mozilla.org/#server=traefik&version=2.1.2&config=modern&guideline=5.7) is
-a nice tool for seeing good default configuration options.
+![Beam Pipeline](5_images/beam_pipeline.png)

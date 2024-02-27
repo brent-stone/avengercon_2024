@@ -1,0 +1,41 @@
+FROM python:3.11-slim as requirements
+
+WORKDIR /tmp
+RUN mkdir -p requirements
+RUN pip install --upgrade pip poetry
+RUN poetry self add poetry-plugin-export
+COPY ./pyproject.toml pyproject.toml
+COPY ./poetry.lock poetry.lock
+COPY ./scripts/export_poetry_to_req_txt.sh export_poetry_to_req_txt.sh
+RUN chmod +x export_poetry_to_req_txt.sh
+RUN ./export_poetry_to_req_txt.sh
+
+FROM prefecthq/prefect:2-python3.11 as development
+
+# Mitigate the issue when running a flow with DaskTaskRunner
+# RuntimeError: Unable to find any timezone configuration
+# https://github.com/PrefectHQ/prefect/issues/3061
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -y && apt-get install -y tzdata
+# Cleanup the apt cache
+RUN apt-get purge -y --auto-remove
+RUN rm -rf /var/lib/apt/lists/*
+
+COPY --from=requirements /tmp/requirements/requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+# Add Avengercon code base
+COPY ./README.md README.md
+COPY ./pyproject.toml pyproject.toml
+COPY ./avengercon avengercon
+RUN pip install ./
+
+ENV TZ="America/New_York"
+#RUN cp /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+EXPOSE 4200
+
+FROM prefect as production
+
+# Remove pip's cache to reduce final image size
+# https://pip.pypa.io/en/stable/topics/caching/#avoiding-caching
+RUN pip cache purge
