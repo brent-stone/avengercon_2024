@@ -1,3 +1,7 @@
+# This should be moved into .github/workflows to trigger GitHub Actions that will run
+# pytest. Since this isn't really needed for the workshop, it has been moved here as a
+# reference.
+
 name: test
 
 on:
