@@ -8,6 +8,7 @@ from avengercon import __version__
 from avengercon.celery import verify_celery_connection
 from avengercon.celery.tasks import hello_avengercon
 from celery.result import AsyncResult
+from avengercon.prefect.flows import hello_prefect_flow
 
 router = APIRouter()
 
@@ -39,3 +40,16 @@ async def hello_celery() -> str:
         l_response: AsyncResult = hello_avengercon.delay()
         return l_response.get()
     return f"Couldn't connect to Celery =\\"
+
+
+@router.get(
+    path="/hello_prefect",
+    response_model=str,
+)
+async def hello_prefect() -> str:
+    """
+    Most basic test to validate the Prefect service is accessible
+    Returns: A greeting string
+
+    """
+    return hello_prefect_flow()

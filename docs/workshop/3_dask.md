@@ -1,13 +1,13 @@
 ## What is Dask?
 
-[This article](https://www.nvidia.com/en-us/glossary/dask/) by NVIDIA has decent
-infographics and explanations on what Dask is. The VERY summarized explanation is it's a
-library that combines [Tornado](https://www.tornadoweb.org/en/stable/) and Pandas so
+The [Dask Tutorial](https://tutorial.dask.org/00_overview.html) and [this article](https://www.nvidia.com/en-us/glossary/dask/)
+by NVIDIA has decent infographics and explanations on what Dask is. The VERY summarized
+explanation is it's a library that combines [Tornado](https://www.tornadoweb.org/en/stable/) and Pandas so
 that an arbitrary number of Python interpreters and Pandas DataFrames can be used as if
 they were a single interpreter and DataFrame.
 
 The [Journey of a Task](https://distributed.dask.org/en/latest/journey.html) explanation
-by the Dask authors provides a nice intro to how the framework operates.
+by the Dask authors provides a nice end-to-end primer on how the framework operates.
 
 ## What is Coiled and Prefect?
 Dask fits into a growing segment of the data/tech industry where Free and Open Source
@@ -15,7 +15,8 @@ Software (FOSS) is provided with fully-managed and extended offerings made avail
 the primary contributors to make an income.
 
 Two of the more prominent companies aligned with Dask are [Coiled.io](https://www.coiled.io/)
-and [Prefect](https://www.prefect.io/).
+and [Prefect](https://www.prefect.io/). Coiled is basically a fully-managed Dask cluster while Prefect is an
+expanded offering more geared towards [ETL pipelines](https://examples.dask.org/applications/prefect-etl.html).
 
 
 ## Dask created hands-on crash course

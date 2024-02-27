@@ -205,6 +205,11 @@ approximation for "Stone")
 
     ![Celery](1_images/celery.png)
 
+=== "Swagger (FastAPI)"
+    [FastAPI :simple-fastapi: + :simple-swagger:](http://api.localhost:57073/docs){ .md-button .md-button--primary}
+
+    ![Swagger (FastAPI)](1_images/swagger.png)
+
 === "Traefik"
     [Traefik :simple-traefikproxy:](http://proxy.localhost:57073/dashboard/#/){ .md-button .md-button--primary}
 
