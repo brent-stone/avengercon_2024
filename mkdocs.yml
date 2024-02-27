@@ -52,7 +52,7 @@ nav:
   - Workshop:
     - Hello, Workshop!: workshop/1_hello_workshop.md
     - Parallel Pros and Cons: workshop/2_pros_cons.md
-    - Dask & Prefect: workshop/3_dask.md
+    - Dask: workshop/3_dask.md
     - Celery & Flower: workshop/4_celery.md
     - Apache Beam: workshop/5_beam.md
   - Other Information:
@@ -73,7 +73,11 @@ markdown_extensions:
     title: Page contents
 - admonition
 - pymdownx.details
-- pymdownx.superfences
+- pymdownx.superfences:
+    custom_fences:
+      - name: mermaid
+        class: mermaid
+        format: !!python/name:pymdownx.superfences.fence_code_format
 - pymdownx.highlight:
     pygments_lang_class: true
 - pymdownx.extra
