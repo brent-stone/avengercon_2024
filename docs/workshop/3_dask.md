@@ -43,10 +43,10 @@ In your IDE with your virtual environment activated ([as described earlier](1_he
 try making and running a new python script in the `avengercon_2024` directory.
 
 ``` py title="testing.py"
-from avengercon.prefect.flows import hello_prefect_flows
+from avengercon.prefect.flows import hello_prefect_flow
 from avengercon.prefect.storage import create_default_prefect_blocks, create_default_prefect_buckets
 
-print(hello_prefect_flows())
+print(hello_prefect_flow())
 create_default_prefect_buckets()
 create_default_prefect_blocks()
 ```
