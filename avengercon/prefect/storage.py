@@ -52,7 +52,7 @@ def create_default_prefect_blocks() -> BucketCreationResult:
         try:
             block_storage = RemoteFileSystem(
                 basepath=f"s3://{l_bucket_name}",
-                key_type="hash",
+                # key_type="hash",
                 settings=dict(
                     use_ssl=minio_config.secure,
                     key=minio_config.access_key,

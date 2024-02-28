@@ -9,23 +9,36 @@ from prefect_dask import get_dask_client as prefect_get_dask_client
 
 # Note: This will implicitly get configured via the DASK_SCHEDULER_ADDRESS environment
 # variable
-dask_client = Client(
-    address=dask_config.scheduler_address,
-    asynchronous=False,
-    name="DaskClientSync",
-)
+# dask_client = Client(
+#     address=dask_config.scheduler_address,
+#     asynchronous=False,
+#     name="DaskClientSync",
+# )
 
 
 def get_dask_client() -> Client:
     """
-    Wrapper for the prefect_dask get_dask_client() function that pre-populates the Dask
-    cluster information.
-    Returns: A Dask client
+    Return a configured Dask client
+    Returns: Dask Client object
 
     """
-    with prefect_get_dask_client(
+    l_client: Client = Client(  # type: ignore
         address=dask_config.scheduler_address,
-        asynchronous=False,
         name="DaskClientSync",
-    ) as l_client:
-        yield l_client
+    )
+    return l_client
+
+
+# def get_prefect_dask_client() -> Client:
+#     """
+#     Wrapper for the prefect_dask get_dask_client() function that pre-populates the Dask
+#     cluster information.
+#     Returns: A Dask client
+#
+#     """
+#     with prefect_get_dask_client(
+#         address=dask_config.scheduler_address,
+#         asynchronous=False,
+#         name="DaskClientSync",
+#     ) as l_client:
+#         yield l_client
