@@ -13,6 +13,8 @@ from avengercon.prefect.flows import hello_prefect_flow
 from avengercon.dask import get_dask_client
 from fastapi import HTTPException, status
 from avengercon.redis.tasks import hello_redis
+from avengercon.schemas import AISettingsCreateSchema
+from pydantic import ValidationError
 
 router = APIRouter()
 
@@ -91,3 +93,24 @@ async def hello_redis_route() -> str:
             detail="Redis not connected",
         )
     return l_greeting
+
+
+@router.get(
+    path="/hello_pydantic",
+    response_model=AISettingsCreateSchema,
+)
+async def hello_pydantic_route() -> AISettingsCreateSchema:
+    """
+    Most basic test to validate Pydantic is installed & working and
+    to demo how schema definitions can be automatically included in
+    the Swagger interface
+    Returns: A schema with default values
+
+    """
+    try:
+        return AISettingsCreateSchema()
+    except ValidationError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="invalid schema",
+        )
